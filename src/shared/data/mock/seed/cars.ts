@@ -1,0 +1,147 @@
+import type {Car} from '../../types';
+export const cars:Car[]=[
+  {
+    "id": "CAR-01",
+    "number": "01",
+    "plate": "กข 1201",
+    "model": "Toyota Corolla Altis",
+    "type": "SEDAN",
+    "seats": 5,
+    "keySlot": "01",
+    "stationId": "ST-GATE1",
+    "currentMileage": 45188,
+    "active": true
+  },
+  {
+    "id": "CAR-02",
+    "number": "02",
+    "plate": "กข 1202",
+    "model": "Honda City",
+    "type": "SEDAN",
+    "seats": 5,
+    "keySlot": "02",
+    "stationId": "ST-GATE1",
+    "currentMileage": 38400,
+    "active": true
+  },
+  {
+    "id": "CAR-03",
+    "number": "03",
+    "plate": "กข 1203",
+    "model": "Isuzu D-Max 4 ประตู",
+    "type": "PICKUP",
+    "seats": 5,
+    "keySlot": "03",
+    "stationId": "ST-GATE1",
+    "currentMileage": 72350,
+    "active": true
+  },
+  {
+    "id": "CAR-04",
+    "number": "04",
+    "plate": "กข 1204",
+    "model": "Toyota Commuter",
+    "type": "VAN",
+    "seats": 12,
+    "keySlot": "04",
+    "stationId": "ST-GATE1",
+    "currentMileage": 98210,
+    "active": true
+  },
+  {
+    "id": "CAR-05",
+    "number": "05",
+    "plate": "กข 1205",
+    "model": "Toyota Fortuner",
+    "type": "SUV",
+    "seats": 7,
+    "keySlot": "05",
+    "stationId": "ST-GATE1",
+    "currentMileage": 61005,
+    "active": true
+  },
+  {
+    "id": "CAR-06",
+    "number": "06",
+    "plate": "กข 1206",
+    "model": "Toyota Yaris Ativ",
+    "type": "SEDAN",
+    "seats": 5,
+    "keySlot": "06",
+    "stationId": "ST-GATE1",
+    "currentMileage": 22780,
+    "active": true
+  },
+  {
+    "id": "CAR-07",
+    "number": "07",
+    "plate": "กข 1207",
+    "model": "Toyota Hilux Revo 4 ประตู",
+    "type": "PICKUP",
+    "seats": 5,
+    "keySlot": "07",
+    "stationId": "ST-GATE1",
+    "currentMileage": 80540,
+    "active": true
+  },
+  {
+    "id": "CAR-08",
+    "number": "08",
+    "plate": "กข 1208",
+    "model": "Hyundai Staria",
+    "type": "VAN",
+    "seats": 11,
+    "keySlot": "08",
+    "stationId": "ST-GATE1",
+    "currentMileage": 15320,
+    "active": true
+  },
+  {
+    "id": "CAR-09",
+    "number": "09",
+    "plate": "กข 1209",
+    "model": "Honda CR-V",
+    "type": "SUV",
+    "seats": 7,
+    "keySlot": "09",
+    "stationId": "ST-GATE1",
+    "currentMileage": 33900,
+    "active": true
+  },
+  {
+    "id": "CAR-10",
+    "number": "10",
+    "plate": "กข 1210",
+    "model": "Toyota Camry",
+    "type": "SEDAN",
+    "seats": 5,
+    "keySlot": "10",
+    "stationId": "ST-GATE1",
+    "currentMileage": 51640,
+    "active": true
+  },
+  {
+    "id": "CAR-11",
+    "number": "11",
+    "plate": "กข 1211",
+    "model": "Nissan Navara 4 ประตู",
+    "type": "PICKUP",
+    "seats": 5,
+    "keySlot": "11",
+    "stationId": "ST-GATE1",
+    "currentMileage": 67215,
+    "active": true
+  },
+  {
+    "id": "CAR-12",
+    "number": "12",
+    "plate": "กข 1212",
+    "model": "Toyota Corolla Cross",
+    "type": "SUV",
+    "seats": 5,
+    "keySlot": "12",
+    "stationId": "ST-GATE1",
+    "currentMileage": 45210,
+    "active": true
+  }
+];

@@ -1,0 +1,18 @@
+﻿import fs from 'node:fs';
+const spec = fs.readFileSync('docs/SPEC.md', 'utf8');
+const write = (path, value) => { fs.mkdirSync(path.split('/').slice(0, -1).join('/') || '.', {recursive:true}); fs.writeFileSync(path, value); };
+const block = (heading, language) => spec.slice(spec.indexOf(heading)).split('```' + language)[1].split('```')[0].trim() + '\n';
+write('src/shared/config/app.config.ts', block('### 4.2', 'ts'));
+write('src/shared/data/types.ts', block('### 6.1', 'ts'));
+const contract = block('### 7.1', 'ts');
+const types = [...block('### 6.1', 'ts').matchAll(/export (?:type|interface) (\w+)/g)].map(m => m[1]).filter(t => new RegExp('\\b'+t+'\\b').test(contract));
+write('src/shared/data/contracts.ts', `import type { ${types.join(', ')} } from './types';\n` + contract);
+write('.env.example', block('### 4.1', 'bash'));
+write('.env.local', block('### 4.1', 'bash'));
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+pkg.name = 'bookings-central-system';
+Object.assign(pkg.scripts, {lint:'eslint .', typecheck:'tsc --noEmit', test:'vitest run', 'test:e2e':'playwright test', 'check:colors':'node scripts/check-no-red.mjs'});
+write('package.json', JSON.stringify(pkg, null, 2) + '\n');
+write('next.config.ts', fs.readFileSync('next.config.ts','utf8').replace('cacheComponents: true','cacheComponents: false').replace(/  partialPrefetching: true,\r?\n/,''));
+write('AGENTS.md', fs.readFileSync('node_modules/next/AGENTS.md','utf8').replace('`dist/docs/`','`node_modules/next/dist/docs/`') + '\nProduct spec: อ่าน docs/SPEC.md ก่อนเริ่มงานทุกครั้ง\n');
+write('docs/DECISIONS.md', '# การตัดสินใจในการพัฒนา\n\n- ใช้ Next.js 16.4.0 จาก create-next-app ล่าสุดตามข้อ 3.1 และปิด cacheComponents\n- เครื่องมี Node.js 20.11.1 (ผ่านขั้นต่ำ 20.9) และ Corepack 0.23; ใช้ pnpm 10.11.0 เพราะ pnpm ล่าสุดไม่ทำงานบนเครื่องนี้ มีตัวเรียก .tools/pnpm.cmd สำหรับ Windows\n- create-next-app สร้างไฟล์สำเร็จแต่ติดตั้งไม่ได้เพราะไม่มี pnpm ใน PATH จึงย้าย scaffold มา root และติดตั้งต่อด้วย Corepack; AGENTS.md ใช้ต้นฉบับจากแพ็กเกจ next\n- อ่านเอกสาร Next.js ที่ติดตั้งเกี่ยวกับ cookies, Server Actions และ proxy ก่อนพัฒนา รวมถึง https://nextjs.org/docs/app/guides/upgrading/version-16\n');

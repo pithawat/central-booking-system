@@ -1,0 +1,73 @@
+'use client';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {Home,Car,CalendarDays,ClipboardList,CheckSquare,KeyRound,LogOut,Users,CalendarCheck2,ChevronDown} from 'lucide-react';
+import type {User} from '@/shared/data/types';
+import {UserAvatar} from './user-avatar';
+import {Button} from '@/components/ui/button';
+import {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator} from '@/components/ui/dropdown-menu';
+import {signOut} from '@/shared/auth/actions';
+
+type Props={user:User;name:string;cars:boolean;rooms:boolean;supervisor:boolean;pending:number;mock:boolean;children:React.ReactNode};
+
+export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}:Props) {
+ const pathname=usePathname();
+ const menu=[
+  {href:'/',label:'หน้าแรก',short:'หน้าแรก',icon:Home},
+  ...(cars?[{href:'/cars',label:'จองรถ',short:'จองรถ',icon:Car}]:[]),
+  ...(rooms?[{href:'/rooms',label:'จองห้องประชุม',short:'จองห้อง',icon:CalendarDays}]:[]),
+  {href:'/my',label:'การจองของฉัน',short:'ของฉัน',icon:ClipboardList},
+  ...(rooms&&supervisor?[{href:'/rooms/approvals',label:'รออนุมัติ',short:'รออนุมัติ',icon:CheckSquare}]:[]),
+  ...(cars&&user.roles.includes('ADMIN')?[{href:'/admin/key-log',label:'รายงานกุญแจ',short:'รายงาน',icon:KeyRound}]:[]),
+ ];
+ const active=(href:string)=>href==='/'?pathname==='/':href==='/rooms'?pathname.startsWith('/rooms')&&!pathname.startsWith('/rooms/approvals'):pathname.startsWith(href);
+ const wide=pathname==='/rooms';
+ const badge=(href:string,className='')=>href==='/rooms/approvals'&&pending>0?<span className={'inline-flex min-w-6 h-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular-nums '+className}>{pending}<span className="sr-only"> รายการ</span></span>:null;
+ return <>
+  <header className="app-top sticky top-0 z-30 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+   <div className={(wide?'max-w-[1440px]':'max-w-6xl')+' mx-auto flex h-16 items-center justify-between gap-3 px-4'}>
+    <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl font-heading font-semibold text-foreground">
+     <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm"><CalendarCheck2 size={20} aria-hidden/></span>
+     <span className="md:hidden lg:inline">{name}</span>
+    </Link>
+    <nav aria-label="เมนูหลัก" className="desktop-nav hidden h-full md:flex items-stretch gap-0.5">
+     {menu.map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'group relative flex items-center gap-1.5 px-3 text-sm font-medium transition-colors '+(active(m.href)?'text-primary':'text-muted-foreground hover:text-foreground')}>
+      <span className={'flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors '+(active(m.href)?'bg-accent':'group-hover:bg-muted')}>
+       <m.icon size={18} aria-hidden/>
+       <span className="xl:hidden">{m.short}</span><span className="hidden xl:inline">{m.label}</span>
+       {badge(m.href)}
+      </span>
+      {active(m.href)&&<span aria-hidden className="absolute inset-x-2 -bottom-px h-[3px] rounded-t-full bg-primary"/>}
+     </Link>)}
+    </nav>
+    <DropdownMenu>
+     <DropdownMenuTrigger asChild>
+      <Button variant="ghost" className="h-12 gap-2 rounded-full px-1.5 lg:pr-3">
+       <UserAvatar user={user} className="size-9"/>
+       <span className="hidden lg:inline font-medium">{user.firstName}</span>
+       <ChevronDown aria-hidden className="hidden lg:block text-muted-foreground"/>
+       <span className="sr-only">เมนูผู้ใช้</span>
+      </Button>
+     </DropdownMenuTrigger>
+     <DropdownMenuContent align="end" className="w-64 p-1.5">
+      <DropdownMenuLabel className="flex items-center gap-3 p-2">
+       <UserAvatar user={user} className="size-10"/>
+       <span className="min-w-0"><span className="block truncate font-heading text-base font-semibold text-foreground">{user.displayName}</span><span className="block truncate text-sm font-normal text-muted-foreground">{user.departmentName}</span></span>
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator/>
+      {mock&&<DropdownMenuItem asChild><Link className="min-h-12 gap-2 text-base" href="/login"><Users aria-hidden/>สลับผู้ใช้ทดสอบ</Link></DropdownMenuItem>}
+      <DropdownMenuItem asChild><form action={signOut}><button className="flex w-full min-h-12 items-center gap-2 text-base"><LogOut aria-hidden/>ออกจากระบบ</button></form></DropdownMenuItem>
+     </DropdownMenuContent>
+    </DropdownMenu>
+   </div>
+  </header>
+  <main id="main-content" className={(wide?'max-w-[1440px]':'max-w-6xl')+' mx-auto px-4 py-6 md:py-8 pb-40 md:pb-24'}>{children}</main>
+  <nav aria-label="เมนูมือถือ" className="bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 h-16 border-t bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] flex">
+   {menu.filter(m=>m.href!=='/admin/key-log').map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'relative flex flex-1 flex-col items-center justify-center gap-0.5 text-sm '+(active(m.href)?'text-primary font-semibold':'text-muted-foreground')}>
+    {active(m.href)&&<span aria-hidden className="absolute inset-x-4 top-0 h-[3px] rounded-b-full bg-primary"/>}
+    <span className="relative"><m.icon size={22} aria-hidden/>{badge(m.href,'absolute -top-2 -right-3 min-w-5 h-5')}</span>
+    <span className={active(m.href)?'underline decoration-2 underline-offset-4':''}>{m.short}</span>
+   </Link>)}
+  </nav>
+ </>;
+}

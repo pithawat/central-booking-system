@@ -1,0 +1,166 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-plex-looped), Tahoma, sans-serif;
+  --font-heading: var(--font-plex-thai), var(--font-plex-looped), sans-serif;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #0f172a;            /* slate-900 */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #1d4ed8;               /* blue-700 */
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;             /* slate-100 */
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;      /* slate-600 คอนทราสต์ผ่าน AA */
+  --accent: #eff6ff;                /* blue-50 */
+  --accent-foreground: #1e3a8a;     /* blue-900 */
+  --destructive: #c2410c;           /* orange-700 ห้ามเป็นสีแดง */
+  --border: #e2e8f0;                /* slate-200 */
+  --input: #64748b;                 /* slate-500 ขอบช่องกรอกคอนทราสต์ผ่าน 3:1 */
+  --ring: #2563eb;                  /* blue-600 */
+
+  --status-mine: #1d4ed8;           --status-mine-foreground: #ffffff;
+  --status-pending: #fef3c7;        --status-pending-foreground: #78350f;  --status-pending-border: #f59e0b;
+  --status-other: #f1f5f9;          --status-other-foreground: #334155;    --status-other-border: #cbd5e1;
+  --status-free-hover: #eff6ff;
+  --success: #047857;               --success-bg: #ecfdf5;                 --success-border: #6ee7b7;
+  --warning: #b45309;               --warning-bg: #fffbeb;                 --warning-border: #fcd34d;
+  --overdue: #c2410c;               --overdue-bg: #fff7ed;                 --overdue-border: #fdba74;
+}
+
+@theme inline {
+  --color-status-mine: var(--status-mine);
+  --color-status-mine-foreground: var(--status-mine-foreground);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-status-other: var(--status-other);
+  --color-status-other-foreground: var(--status-other-foreground);
+  --color-status-other-border: var(--status-other-border);
+  --color-status-free-hover: var(--status-free-hover);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
+  --color-overdue: var(--overdue);
+  --color-overdue-bg: var(--overdue-bg);
+  --color-overdue-border: var(--overdue-border);
+}
+
+.dark { --destructive: #c2410c; }
+
+/* พื้นหลังของพื้นที่เนื้อหาและเงาการ์ด (ส่วนเสริมของ theme ไม่แทนค่า token ในหัวข้อ 11.2) */
+:root {
+  --canvas: #f5f7fb;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 8px -2px rgb(15 23 42 / 0.06);
+  --shadow-raised: 0 4px 6px -2px rgb(15 23 42 / 0.05), 0 12px 24px -6px rgb(15 23 42 / 0.12);
+}
+@theme inline {
+  --color-canvas: var(--canvas);
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
+}
+
+@utility surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+@utility surface-interactive {
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, background-color .15s ease;
+  &:hover { border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); box-shadow: var(--shadow-raised); }
+}
+
+html { font-size: 106.25%; }
+body { font-family: var(--font-plex-looped), Tahoma, sans-serif; line-height: 1.65; background: var(--canvas); }
+h1,h2,h3 { font-family: var(--font-plex-thai),sans-serif; font-weight:600; line-height:1.35; letter-spacing:-0.01em; }
+h1 { font-size:1.875rem; } h2 { font-size:1.5rem; } h3 { font-size:1.25rem; }
+button,a,input,select,textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline:3px solid var(--ring); outline-offset:3px; }
+select { min-height:48px; border:1px solid var(--input); border-radius:12px; padding:8px 12px; background:white; max-width:100%; }
+.mailbox-grid { display:grid; grid-template-columns:360px minmax(0,1fr); gap:24px; }
+.scrollbar-thin { scrollbar-width: thin; }
+@media(max-width:1100px) and (min-width:768px) { .app-top .desktop-nav a { padding-inline: 0.5rem; } }
+@media(max-width:767px) { .mailbox-grid { display:block; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+@media print {
+  body { background: white; }
+  .app-top,.bottom-nav,.dev-button,.no-print { display:none!important; }
+  main { padding:0!important; max-width:none!important; }
+  .surface { box-shadow:none; border:0; }
+  @page { size: A4; margin: 14mm; }
+}
+.key-log th { background: var(--secondary); font-weight: 600; }
+@media print { .key-log th,.key-log td { border-color:#334155!important; } .key-log th { background:#f1f5f9!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+.slot-past { background: repeating-linear-gradient(135deg, #f1f5f9 0 6px, #e2e8f0 6px 7px); }
+@keyframes guard-countdown { from { width: 100%; } to { width: 0%; } }
+.guard-countdown { animation-name: guard-countdown; animation-timing-function: linear; animation-fill-mode: forwards; }
