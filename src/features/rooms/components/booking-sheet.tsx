@@ -98,7 +98,7 @@ function BookingForm({draft,bookings,me,supervisor,onBooked}:{draft:BookingDraft
    {supervisor?<><Mail size={20} aria-hidden className="mt-0.5 shrink-0 text-primary"/><span>ส่งขออนุมัติถึง <strong className="text-foreground">{supervisor.displayName}</strong> (หัวหน้าของคุณ)</span></>:<><CheckCircle2 size={20} aria-hidden className="mt-0.5 shrink-0"/>อนุมัติอัตโนมัติ</>}
   </p>
   {error&&<p role="alert" className="rounded-xl border border-overdue-border bg-overdue-bg p-3 text-overdue">{error}</p>}
-  <div className="sticky bottom-0 -mx-5 border-t bg-white/95 px-5 py-4 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
+  <div className="sticky bottom-0 -mx-4 border-t bg-white/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
    <Button type="submit" size="lg" className="w-full" disabled={pending||!!clash||startBlocked}>{pending?<><Spinner/>กำลังส่ง…</>:supervisor?'ส่งขออนุมัติ':'จองห้อง'}</Button>
    <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-muted-foreground"><Clock size={14} aria-hidden/>{formatDate(start)} · {formatRange(start,end)}</p>
   </div>

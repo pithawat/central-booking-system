@@ -23,7 +23,7 @@ export function BookingInfo({booking:b}:{booking:RoomBookingDetail}) {
   ['ผู้อนุมัติ',b.approver?b.approver.displayName:'อนุมัติอัตโนมัติ'],
  ];
  if(b.rejectReason)rows.push(['เหตุผลที่ไม่อนุมัติ',b.rejectReason]);
- return <dl className="divide-y rounded-2xl border bg-white">{rows.map(([k,v])=><div key={k} className="grid grid-cols-[8.5rem_minmax(0,1fr)] items-center gap-3 px-4 py-3"><dt className="text-muted-foreground">{k}</dt><dd className="min-w-0 break-words">{v}</dd></div>)}</dl>;
+ return <dl className="divide-y rounded-2xl border bg-white">{rows.map(([k,v])=><div key={k} className="grid grid-cols-1 gap-0.5 px-4 py-3 min-[400px]:grid-cols-[7.5rem_minmax(0,1fr)] min-[400px]:items-center min-[400px]:gap-3 sm:grid-cols-[8.5rem_minmax(0,1fr)]"><dt className="text-sm text-muted-foreground min-[400px]:text-base">{k}</dt><dd className="min-w-0 wrap-break-word">{v}</dd></div>)}</dl>;
 }
 
 /** ไทม์ไลน์สถานะ เช่น ส่งคำขอ 09:41 → ส่งถึง วิชัย ส. → อนุมัติ 10:05 */

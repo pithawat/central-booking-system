@@ -1,10 +1,11 @@
-﻿import {template} from './base';
+import {template} from './base';
 import type {CarBooking,Car} from '@/shared/data/types';
 import {formatDate,formatTime,formatRange,formatMileage} from '@/shared/lib/datetime';
 import {appConfig} from '@/shared/config/app.config';
 export function carTemplate(type:string,b:CarBooking,car:Car,url:string,qrSrc:string) {
  const titles:Record<string,string>={
  CAR_BOOKING_CONFIRMED:'ยืนยันการจองรถ #'+car.number+' · '+formatDate(b.start)+' '+formatRange(b.start,b.end),
+ CAR_DAY_BEFORE_REMINDER:'เตือนล่วงหน้า: จองรถ #'+car.number+' ทะเบียน '+car.plate+' · รับรถ '+formatDate(b.start)+' '+formatTime(b.start),
  CAR_PICKUP_REMINDER:'ถึงเวลารับรถ #'+car.number+' แล้ว · รหัส '+b.pickupCode,
  CAR_HANDOVER_RECEIPT:'รับกุญแจรถ #'+car.number+' แล้ว '+formatTime(b.pickedUpAt ?? b.start),
  CAR_RETURN_REMINDER:'อีก '+appConfig.car.reminderBeforeReturnMinutes+' นาทีถึงเวลาคืนรถ #'+car.number,

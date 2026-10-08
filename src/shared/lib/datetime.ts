@@ -11,8 +11,16 @@ function parts(d:DateInput,system:'CE'|'BE'=appConfig.yearSystem) {const [y,m,da
 export function formatDate(d:DateInput,system:'CE'|'BE'=appConfig.yearSystem) {const p=parts(d,system);return weekdayShort[p.weekday]+' '+p.day+' '+monthShort[p.month]+' '+p.year;}
 export function formatDateLong(d:DateInput) {const p=parts(d);return 'วัน'+weekdayLong[p.weekday]+'ที่ '+p.day+' '+monthLong[p.month]+' '+p.year;}
 const dayMonth=(d:DateInput)=>{const p=parts(d);return p.day+' '+monthShort[p.month];};
+/** วันแบบสั้นไม่มีปี เช่น "พฤ. 8 ต.ค." ใช้ในที่แคบบนมือถือ */
+export function formatDateShort(d:DateInput) {return weekdayShort[parts(d).weekday]+' '+dayMonth(d);}
+/** ชื่อวันย่อและเลขวัน แยกกัน ใช้ในแถบเลือกวัน */
+export function dayParts(d:DateInput) {const p=parts(d);return {weekday:weekdayShort[p.weekday],day:p.day};}
 export function formatTime(d:DateInput) {return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:appConfig.timeZone}).format(date(d));}
 export function formatRange(a:DateInput,b:DateInput) {return todayInBangkok(a)===todayInBangkok(b)?formatTime(a)+'–'+formatTime(b):dayMonth(a)+' '+formatTime(a)+' – '+dayMonth(b)+' '+formatTime(b);}
+/** ช่วงการจอง: วันเดียว = "พ. 7 ต.ค. 2026 · 09:30–12:00", หลายวัน = "พ. 7 ต.ค. 09:00 – ศ. 9 ต.ค. 17:00" */
+/** ช่วงเวลาแยก 2 ท่อน ให้จอแคบตัดบรรทัดระหว่างท่อนได้ เช่น ['พฤ. 8 ต.ค. 2026 ·','09:00–10:00'] หรือ ['พฤ. 8 ต.ค. 09:00 –','ศ. 9 ต.ค. 17:00'] */
+export function periodParts(a:DateInput,b:DateInput):[string,string] {return todayInBangkok(a)===todayInBangkok(b)?[formatDate(a)+' ·',formatRange(a,b)]:[formatDateShort(a)+' '+formatTime(a)+' –',formatDateShort(b)+' '+formatTime(b)];}
+export function formatPeriod(a:DateInput,b:DateInput) {return periodParts(a,b).join(' ');}
 export function formatDuration(min:number) {const h=Math.floor(min/60),m=min%60;return [h?h+' ชม.':'',m?m+' นาที':''].filter(Boolean).join(' ') || '0 นาที';}
 export function formatRelative(d:DateInput,reference:DateInput=new Date()) {const diff=Math.ceil((date(d).getTime()-date(reference).getTime())/60000);return diff>=0?'อีก '+diff+' นาที':'เกิน '+Math.abs(diff)+' นาที';}
 export function formatMileage(n:number) {return new Intl.NumberFormat('en-US').format(n)+' กม.';}

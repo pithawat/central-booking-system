@@ -1,4 +1,4 @@
-﻿import 'server-only';
+import 'server-only';
 import {getDb} from './store';
 import {notifyCar,notifyRoom} from './notifications';
 import {appConfig} from '@/shared/config/app.config';
@@ -16,6 +16,7 @@ async function execute(at:Date) {
  if(b.status==='CONFIRMED') {
  if(time>=millis(b.start)+appConfig.car.noShowCancelMinutes*60000){b.status='NO_SHOW';b.updatedAt=at.toISOString();await send('CAR_NO_SHOW',b.id);}
  else if(time>=millis(b.start)-appConfig.car.reminderBeforePickupMinutes*60000)await send('CAR_PICKUP_REMINDER',b.id);
+ else if(time>=millis(b.start)-appConfig.car.reminderDayBeforeHours*3600000&&millis(b.createdAt)<=millis(b.start)-appConfig.car.reminderDayBeforeHours*3600000)await send('CAR_DAY_BEFORE_REMINDER',b.id);
  }else if(b.status==='IN_USE') {
  if(time>=millis(b.end)+appConfig.car.overdueNoticeMinutes*60000)await send('CAR_OVERDUE',b.id);
  else if(time>=millis(b.end)-appConfig.car.reminderBeforeReturnMinutes*60000)await send('CAR_RETURN_REMINDER',b.id);

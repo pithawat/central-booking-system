@@ -1,45 +1,66 @@
 import Link from 'next/link';
-import {Car,CalendarDays,ArrowRight,DoorOpen,BellRing,CalendarClock} from 'lucide-react';
+import {Car,CalendarDays,ChevronRight,DoorOpen,BellRing,CalendarClock,ArrowUpRight,CarFront} from 'lucide-react';
 import {CarPass} from '@/features/cars/components/car-pass';
+import {MyCarBookingCard} from '@/features/cars/components/my-car-bookings';
+import {LicensePlate} from '@/features/cars/components/car-visual';
 import {requireUser} from '@/shared/auth/require';
 import {getServices} from '@/shared/data';
 import {env} from '@/shared/config/env';
+import {appConfig} from '@/shared/config/app.config';
 import {now} from '@/shared/lib/clock';
-import {formatDateLong,formatDate,formatRange} from '@/shared/lib/datetime';
+import {formatDate,formatDateLong} from '@/shared/lib/datetime';
+import {PeriodText} from '@/shared/ui/period-text';
 import {StatusBadge} from '@/shared/ui/status-badge';
 import {EmptyState} from '@/shared/ui/empty-state';
 import {Button} from '@/components/ui/button';
+
+function SectionTitle({id,icon:Icon,title,href,link}:{id:string;icon:typeof Car;title:string;href?:string;link?:string}) {
+ return <div className="mb-3 flex items-center justify-between gap-3"><h2 id={id} className="flex min-w-0 items-center gap-2 text-lg sm:text-xl"><Icon aria-hidden className="size-5 shrink-0 text-primary"/>{title}</h2>{href&&<Link href={href} className="inline-flex min-h-11 shrink-0 items-center gap-0.5 font-medium text-primary">{link}<span className="sr-only"> · {title}</span><ChevronRight aria-hidden className="size-4"/></Link>}</div>;
+}
+
 export default async function HomePage() {
  const user=await requireUser(),s=await getServices(),cars=env.NEXT_PUBLIC_ENABLE_CARS,rooms=env.NEXT_PUBLIC_ENABLE_ROOMS;
  const supervisor=rooms&&(user.roles.includes('ADMIN')||await s.users.isSupervisor(user.id));
  const [carList,roomList,pass,count]=await Promise.all([cars?s.carBookings.listMine('upcoming'):[],rooms?s.roomBookings.listMine('upcoming'):[],cars?s.carBookings.activePass():null,supervisor?s.approvals.pendingCount():0]);
- const upcoming=[...carList.map(b=>({id:b.id,kind:'car' as const,start:b.start,end:b.end,title:'รถ #'+b.car.number+' · '+b.purpose,badge:<StatusBadge kind="car" status={b.status}/>,href:'/cars/bookings/'+b.id})),...roomList.map(b=>({id:b.id,kind:'room' as const,start:b.start,end:b.end,title:b.room.shortLabel+' · '+b.title,badge:<StatusBadge kind="room" status={b.status}/>,href:'/rooms/bookings/'+b.id}))].sort((a,b)=>a.start.localeCompare(b.start)).slice(0,5);
- const actions=[...(cars?[{href:'/cars',title:'จองรถ',text:'เลือกรถว่างตามเวลาที่ต้องใช้',icon:Car,tint:'from-blue-50 to-sky-50 text-primary'}]:[]),...(rooms?[{href:'/rooms',title:'จองห้องประชุม',text:'ดูห้องว่างและจองได้ทันที',icon:CalendarDays,tint:'from-indigo-50 to-violet-50 text-indigo-700'}]:[])];
- return <div className="space-y-8">
-  <header className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary via-blue-700 to-indigo-700 px-6 py-7 text-white shadow-raised md:px-8 md:py-9">
-   <div aria-hidden className="absolute -right-16 -top-16 size-64 rounded-full bg-white/10 blur-2xl"/>
-   <div aria-hidden className="absolute -bottom-24 right-24 size-56 rounded-full bg-sky-300/20 blur-3xl"/>
-   <p className="relative text-blue-100">{formatDateLong(now())}</p>
-   <h1 className="relative mt-1 font-heading text-3xl font-semibold md:text-4xl">สวัสดี คุณ{user.firstName}</h1>
-   <p className="relative mt-2 max-w-xl text-blue-50">{upcoming.length?'คุณมีการจองที่กำลังจะถึง '+upcoming.length+' รายการ':'วันนี้ต้องการจองอะไร เลือกได้ด้านล่าง'}</p>
-  </header>
-  {pass&&<CarPass booking={pass}/>}
-  {count>0&&<div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-accent p-4 md:p-5">
-   <p className="flex items-center gap-3 font-medium text-accent-foreground"><span className="grid size-10 place-items-center rounded-xl bg-white text-primary shadow-sm"><BellRing size={20} aria-hidden/></span>มีคำขอจองห้องรออนุมัติ {count} รายการ</p>
-   <Button asChild><Link href="/rooms/approvals">ดูคำขอ</Link></Button>
-  </div>}
-  {actions.length>0&&<div className="grid gap-4 md:grid-cols-2">{actions.map(a=><Link key={a.href} href={a.href} className="surface surface-interactive group flex min-h-28 items-center gap-5 p-5 md:p-6">
-   <span className={'grid size-16 shrink-0 place-items-center rounded-2xl bg-linear-to-br ring-1 ring-black/5 '+a.tint}><a.icon size={30} aria-hidden/></span>
-   <span className="min-w-0 flex-1"><span className="block font-heading text-2xl font-semibold">{a.title}</span><span className="mt-1 block text-muted-foreground">{a.text}</span></span>
-   <ArrowRight aria-hidden className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary"/>
-  </Link>)}</div>}
-  <section>
-   <div className="mb-4 flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-2xl"><CalendarClock aria-hidden className="text-primary"/>การจองที่กำลังจะถึง</h2><Link href="/my" className="font-medium text-primary underline-offset-4 hover:underline">ดูทั้งหมด</Link></div>
-   {upcoming.length?<ul className="surface divide-y overflow-hidden p-0">{upcoming.map(b=><li key={b.id}><Link href={b.href} className="flex flex-wrap items-center gap-4 p-4 transition-colors hover:bg-accent/50 md:p-5">
-    <span className={'grid size-12 shrink-0 place-items-center rounded-xl '+(b.kind==='car'?'bg-blue-50 text-primary':'bg-indigo-50 text-indigo-700')}>{b.kind==='car'?<Car size={22} aria-label="รถ"/>:<DoorOpen size={22} aria-label="ห้องประชุม"/>}</span>
-    <span className="min-w-0 flex-1"><span className="block truncate font-heading text-lg font-semibold">{b.title}</span><span className="mt-0.5 block font-heading tabular-nums text-muted-foreground">{formatDate(b.start)} · {formatRange(b.start,b.end)}</span></span>
-    {b.badge}
-   </Link></li>)}</ul>:<EmptyState icon={CalendarClock} title="ยังไม่มีการจองที่กำลังจะถึง"/>}
+ // สถานะการจองรถ: บัตรรับรถถ้าอยู่ในช่วงรับรถหรือกำลังใช้ ไม่งั้นแสดงการจองรถถัดไป
+ const nextCar=pass?null:carList[0]??null,shown=pass?.id??nextCar?.id;
+ const upcoming=[...carList.filter(b=>b.id!==shown).map(b=>({id:b.id,kind:'car' as const,start:b.start,end:b.end,title:b.purpose,lead:<LicensePlate plate={b.car.plate} size="sm"/>,badge:<StatusBadge kind="car" status={b.status}/>,href:'/cars/bookings/'+b.id,label:'รถ #'+b.car.number+' ทะเบียน '+b.car.plate+' · '+b.purpose})),...roomList.map(b=>({id:b.id,kind:'room' as const,start:b.start,end:b.end,title:b.title,lead:<span className="truncate text-sm font-medium text-indigo-700">{b.room.shortLabel}</span>,badge:<StatusBadge kind="room" status={b.status}/>,href:'/rooms/bookings/'+b.id,label:b.room.shortLabel+' · '+b.title}))].sort((a,b)=>a.start.localeCompare(b.start)).slice(0,5);
+ const actions=[...(cars?[{href:'/cars',title:'จองรถ',text:'เลือกวันรับ-คืน แล้วเลือกรถที่ว่าง',icon:Car,tone:'from-blue-700 to-blue-600 text-blue-50'}]:[]),...(rooms?[{href:'/rooms',title:'จองห้องประชุม',text:'ดูห้องว่างแล้วแตะเพื่อจอง',icon:CalendarDays,tone:'from-indigo-600 to-violet-600 text-indigo-50'}]:[])];
+ const today=now();
+ return <div className="space-y-7 lg:space-y-8">
+  <h1 className="sr-only">หน้าแรก</h1>
+
+  <section aria-labelledby="start-title">
+   <div className="mb-3 flex items-baseline justify-between gap-3"><h2 id="start-title" className="text-lg sm:text-xl">เริ่มจอง</h2><p className="truncate text-sm text-muted-foreground"><span className="sm:hidden">{formatDate(today)}</span><span className="hidden sm:inline">{formatDateLong(today)}</span></p></div>
+   <nav aria-label="จองใหม่" className={'grid gap-3 sm:gap-4 '+(actions.length>1?'grid-cols-2':'grid-cols-1')}>
+    {actions.map(a=><Link key={a.href} href={a.href} className={'group relative isolate flex min-h-36 flex-col justify-between gap-4 overflow-hidden rounded-3xl bg-linear-to-br p-4 shadow-raised transition active:scale-[.98] sm:min-h-40 sm:p-6 '+a.tone}>
+     <a.icon aria-hidden className="absolute -right-5 -bottom-6 -z-10 size-32 text-white/10 transition-transform group-hover:scale-110 sm:size-40"/>
+     <span className="flex items-start justify-between gap-2"><span className="grid size-12 place-items-center rounded-2xl bg-white/20 text-white ring-1 ring-white/25"><a.icon aria-hidden className="size-6"/></span><ArrowUpRight aria-hidden className="size-6 text-white/80 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/></span>
+     <span className="min-w-0"><span className="block font-heading text-xl font-semibold leading-tight text-white sm:text-2xl">{a.title}</span><span className="mt-1 hidden text-sm leading-snug min-[360px]:block sm:text-base">{a.text}</span></span>
+    </Link>)}
+   </nav>
   </section>
+
+  {count>0&&<Link href="/rooms/approvals" className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-accent p-3 font-medium text-accent-foreground transition-colors hover:bg-accent/70 sm:p-4">
+   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-primary shadow-sm"><BellRing size={20} aria-hidden/></span>
+   <span className="min-w-0 flex-1">มีคำขอจองห้องรออนุมัติ {count} รายการ</span><span className="shrink-0 text-primary underline underline-offset-4">ดูคำขอ</span>
+  </Link>}
+
+  <div className="grid grid-cols-1 gap-7 lg:grid-cols-2 lg:items-start lg:gap-6">
+   {cars&&<section aria-labelledby="car-status-title" className="min-w-0">
+    <SectionTitle id="car-status-title" icon={CarFront} title="สถานะการจองรถ" href="/my?tab=cars" link="ทั้งหมด"/>
+    {pass?<CarPass booking={pass} compact/>
+    :nextCar?<div className="space-y-2"><MyCarBookingCard booking={nextCar}/><p className="px-1 text-sm text-muted-foreground">บัตรรับรถพร้อม QR จะขึ้นที่หน้านี้ก่อนเวลารับรถ {appConfig.car.pickupEarlyMinutes} นาที</p></div>
+    :<EmptyState icon={Car} title="ยังไม่มีการจองรถ" description="จองรถแล้วสถานะและ QR รับรถจะแสดงที่นี่"><Button asChild><Link href="/cars">จองรถ</Link></Button></EmptyState>}
+   </section>}
+   <section aria-labelledby="upcoming-title" className="min-w-0">
+    <SectionTitle id="upcoming-title" icon={CalendarClock} title="การจองที่กำลังจะถึง" href="/my" link="ทั้งหมด"/>
+    {upcoming.length?<ul className="surface divide-y overflow-hidden p-0">{upcoming.map(b=><li key={b.id}><Link href={b.href} aria-label={b.label} className="flex items-center gap-3 p-3 transition-colors hover:bg-accent/50 active:bg-accent sm:p-4">
+     <span className={'grid size-10 shrink-0 place-items-center rounded-xl '+(b.kind==='car'?'bg-blue-50 text-primary':'bg-indigo-50 text-indigo-700')}>{b.kind==='car'?<Car size={20} aria-hidden/>:<DoorOpen size={20} aria-hidden/>}</span>
+     <span className="min-w-0 flex-1"><span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">{b.lead}{b.badge}</span><span className="mt-1 block truncate font-medium">{b.title}</span><span className="block text-sm tabular-nums text-muted-foreground"><PeriodText start={b.start} end={b.end}/></span></span>
+     <ChevronRight aria-hidden className="shrink-0 text-muted-foreground"/>
+    </Link></li>)}</ul>:<EmptyState icon={CalendarClock} title="ยังไม่มีการจองที่กำลังจะถึง"/>}
+   </section>
+  </div>
  </div>;
 }

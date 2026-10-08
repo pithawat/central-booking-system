@@ -1,7 +1,7 @@
 # ระบบจองรถและห้องประชุมองค์กร
 
 เว็บแอปเดียวที่รวม 2 ระบบ: **จองรถ** (รับ-คืนกุญแจที่ป้อม รปภ. ด้วย QR หรือรหัส 4 หลัก) และ **จองห้องประชุม** (ตารางห้องว่าง + อนุมัติโดยหัวหน้าผ่านอีเมล)
-สร้างด้วย Next.js 16 (App Router), React 19, Tailwind CSS 4 และ shadcn/ui · รายละเอียดทั้งหมดอยู่ที่ [docs/SPEC.md](docs/SPEC.md) และการตัดสินใจระหว่างพัฒนาอยู่ที่ [docs/DECISIONS.md](docs/DECISIONS.md)
+สร้างด้วย Next.js 16 (App Router), React 19, Tailwind CSS 4 และ shadcn/ui · รายละเอียดทั้งหมดอยู่ที่ [docs/SPEC.md](docs/SPEC.md), flowchart ของแต่ละหน้าอยู่ที่ [docs/FLOWCHARTS.md](docs/FLOWCHARTS.md) และการตัดสินใจระหว่างพัฒนาอยู่ที่ [docs/DECISIONS.md](docs/DECISIONS.md)
 
 ## ติดตั้งและรัน
 
@@ -43,6 +43,10 @@ pnpm dev                        # http://localhost:3000
 | `APP_BASE_URL` | `http://localhost:3000` | ที่อยู่ของแอป ใช้สร้างลิงก์ในอีเมล ต้องตรงกับที่เปิดแอปอยู่ |
 | `NEXT_PUBLIC_APP_NAME` | `ระบบจององค์กร` | ชื่อแอปบนหัวหน้าจอ |
 | `NEXT_PUBLIC_ENABLE_CARS` / `NEXT_PUBLIC_ENABLE_ROOMS` | `true` | ปิดระบบรถหรือห้องทั้งระบบ (เมนู การ์ด และหน้าจะหายไป) |
+
+### รูปรถจริง
+
+ข้อมูลทดสอบมีรูปครบ 12 คันแล้ว (ที่มาและสัญญาอนุญาตดู `public/cars/CREDITS.md`) ถ้าจะเปลี่ยนเป็นรูปรถของบริษัท ให้วางรูปไว้ที่ `public/cars/` (เช่น `public/cars/CAR-12.jpg`) แล้วใส่ `"photoUrl": "/cars/CAR-12.jpg"` ของรถคันนั้นใน `src/shared/data/mock/seed/cars.ts` (โหมด api ให้ backend ส่ง `photoUrl` มากับข้อมูลรถ) ใช้รูปแนวนอนอัตราส่วนประมาณ 4:3 หรือ 16:9 ถ้าไม่มีรูประบบจะแสดงภาพวาดตามประเภทรถ
 
 กฎธุรกิจที่เป็นตัวเลข (เวลา, ระยะเตือน, ขนาดช่อง ฯลฯ) อยู่ที่ `src/shared/config/app.config.ts` ที่เดียว
 

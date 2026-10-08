@@ -37,6 +37,7 @@ export interface Car {
   stationId: string;
   currentMileage: number;
   active: boolean;
+  photoUrl?: string | null;     // รูปรถจริง (URL หรือ path ใน /public) ไม่มีรูปจะแสดงภาพวาดตามประเภทรถ
 }
 
 export type CarBookingStatus = 'CONFIRMED' | 'IN_USE' | 'RETURNED' | 'CANCELLED' | 'NO_SHOW';

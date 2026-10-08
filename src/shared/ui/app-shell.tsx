@@ -1,9 +1,10 @@
 'use client';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {Home,Car,CalendarDays,ClipboardList,CheckSquare,KeyRound,LogOut,Users,CalendarCheck2,ChevronDown} from 'lucide-react';
+import {Home,Car,CalendarDays,ClipboardList,CheckSquare,KeyRound,LogOut,Users,ChevronDown} from 'lucide-react';
 import type {User} from '@/shared/data/types';
 import {UserAvatar} from './user-avatar';
+import {BrandLogo} from './brand-logo';
 import {Button} from '@/components/ui/button';
 import {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator} from '@/components/ui/dropdown-menu';
 import {signOut} from '@/shared/auth/actions';
@@ -24,11 +25,11 @@ export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}
  const wide=pathname==='/rooms';
  const badge=(href:string,className='')=>href==='/rooms/approvals'&&pending>0?<span className={'inline-flex min-w-6 h-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular-nums '+className}>{pending}<span className="sr-only"> รายการ</span></span>:null;
  return <>
-  <header className="app-top sticky top-0 z-30 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+  <header className="app-top sticky top-0 z-30 border-b bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-white/85">
    <div className={(wide?'max-w-[1440px]':'max-w-6xl')+' mx-auto flex h-16 items-center justify-between gap-3 px-4'}>
-    <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl font-heading font-semibold text-foreground">
-     <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm"><CalendarCheck2 size={20} aria-hidden/></span>
-     <span className="md:hidden lg:inline">{name}</span>
+    <Link href="/" className="flex min-h-12 shrink-0 items-center rounded-sm">
+     <BrandLogo className="md:w-20 lg:w-28" sizes="(min-width: 1024px) 120px, (min-width: 768px) 86px, 120px"/>
+     <span className="sr-only"> {name} · หน้าแรก</span>
     </Link>
     <nav aria-label="เมนูหลัก" className="desktop-nav hidden h-full md:flex items-stretch gap-0.5">
      {menu.map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'group relative flex items-center gap-1.5 px-3 text-sm font-medium transition-colors '+(active(m.href)?'text-primary':'text-muted-foreground hover:text-foreground')}>
@@ -55,18 +56,19 @@ export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}
        <span className="min-w-0"><span className="block truncate font-heading text-base font-semibold text-foreground">{user.displayName}</span><span className="block truncate text-sm font-normal text-muted-foreground">{user.departmentName}</span></span>
       </DropdownMenuLabel>
       <DropdownMenuSeparator/>
+      {/* บนมือถือแถบล่างไม่มีรายงานกุญแจ จึงให้ ADMIN เข้าจากเมนูผู้ใช้ */}
+      {cars&&user.roles.includes('ADMIN')&&<DropdownMenuItem asChild className="md:hidden"><Link className="min-h-12 gap-2 text-base" href="/admin/key-log"><KeyRound aria-hidden/>รายงานกุญแจ</Link></DropdownMenuItem>}
       {mock&&<DropdownMenuItem asChild><Link className="min-h-12 gap-2 text-base" href="/login"><Users aria-hidden/>สลับผู้ใช้ทดสอบ</Link></DropdownMenuItem>}
       <DropdownMenuItem asChild><form action={signOut}><button className="flex w-full min-h-12 items-center gap-2 text-base"><LogOut aria-hidden/>ออกจากระบบ</button></form></DropdownMenuItem>
      </DropdownMenuContent>
     </DropdownMenu>
    </div>
   </header>
-  <main id="main-content" className={(wide?'max-w-[1440px]':'max-w-6xl')+' mx-auto px-4 py-6 md:py-8 pb-40 md:pb-24'}>{children}</main>
-  <nav aria-label="เมนูมือถือ" className="bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 h-16 border-t bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] flex">
-   {menu.filter(m=>m.href!=='/admin/key-log').map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'relative flex flex-1 flex-col items-center justify-center gap-0.5 text-sm '+(active(m.href)?'text-primary font-semibold':'text-muted-foreground')}>
-    {active(m.href)&&<span aria-hidden className="absolute inset-x-4 top-0 h-[3px] rounded-b-full bg-primary"/>}
-    <span className="relative"><m.icon size={22} aria-hidden/>{badge(m.href,'absolute -top-2 -right-3 min-w-5 h-5')}</span>
-    <span className={active(m.href)?'underline decoration-2 underline-offset-4':''}>{m.short}</span>
+  <main id="main-content" className={(wide?'max-w-[1440px]':'max-w-6xl')+' mx-auto min-w-0 px-4 pt-4 sm:pt-6 md:py-8 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-24'}>{children}</main>
+  <nav aria-label="เมนูมือถือ" className="bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] flex shadow-[0_-4px_16px_-8px_rgb(15_23_42/.12)]">
+   {menu.filter(m=>m.href!=='/admin/key-log').map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'relative flex h-16 min-w-0 flex-1 flex-col items-center justify-center gap-1 text-sm transition-colors active:bg-muted/60 '+(active(m.href)?'text-primary font-semibold':'text-muted-foreground')}>
+    <span className={'relative flex h-8 w-14 items-center justify-center rounded-full transition-colors '+(active(m.href)?'bg-accent':'')}><m.icon size={22} aria-hidden/>{badge(m.href,'absolute -top-1.5 right-0.5 min-w-5 h-5')}</span>
+    <span className={'max-w-full truncate px-0.5 leading-none '+(active(m.href)?'underline decoration-2 underline-offset-4':'')}>{m.short}</span>
    </Link>)}
   </nav>
  </>;

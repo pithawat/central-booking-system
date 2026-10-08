@@ -1,9 +1,10 @@
 'use client';
 import {useState} from 'react';
-import {CircleCheck,ShieldCheck,LogIn} from 'lucide-react';
+import {CircleCheck,LogIn} from 'lucide-react';
 import type {GuardStation,User} from '@/shared/data/types';
 import {appConfig} from '@/shared/config/app.config';
 import {UserAvatar} from '@/shared/ui/user-avatar';
+import {BrandLogo} from '@/shared/ui/brand-logo';
 import {Button} from '@/components/ui/button';
 import {Spinner} from '@/components/ui/spinner';
 import {CodePad} from './code-pad';
@@ -20,13 +21,13 @@ export function ShiftLogin({station,guards,onStart,pending,error}:{station?:Guar
  const submit=async()=>{if(!ready)return;if(!await onStart(guardId,pin))setPin('');};
  return <div className="mx-auto mt-4 max-w-5xl">
   <div className="surface overflow-hidden">
-   <header className="flex items-center gap-4 border-b bg-accent/50 px-6 py-5 md:px-8">
-    <span className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground"><ShieldCheck aria-hidden className="size-7"/></span>
+   <header className="flex items-center gap-4 border-b bg-accent/50 px-4 py-4 sm:px-6 sm:py-5 md:px-8">
+    <BrandLogo className="w-24 shrink-0 sm:w-32"/>
     <div><p className="text-muted-foreground">{station?.name}</p><h2 className="text-3xl">เข้าเวร</h2></div>
    </header>
-   <div className="grid gap-8 p-6 md:grid-cols-2 md:p-8">
+   <div className="grid grid-cols-1 gap-8 p-4 sm:p-6 md:grid-cols-2 md:p-8">
     <Step n={1} title="แตะชื่อของคุณ" active>
-     <div className="grid gap-3">{guards.map(g=>{const on=guardId===g.id;return <button key={g.id} type="button" aria-pressed={on} onClick={()=>{setGuardId(g.id);setPin('');}} className={'flex min-h-20 items-center gap-4 rounded-2xl border-2 px-4 text-left transition focus-visible:ring-[3px] focus-visible:ring-ring '+(on?'border-primary bg-accent':'border-border bg-white hover:border-primary/50')}>
+     <div className="grid grid-cols-1 gap-3">{guards.map(g=>{const on=guardId===g.id;return <button key={g.id} type="button" aria-pressed={on} onClick={()=>{setGuardId(g.id);setPin('');}} className={'flex min-h-20 items-center gap-4 rounded-2xl border-2 px-4 text-left transition focus-visible:ring-[3px] focus-visible:ring-ring '+(on?'border-primary bg-accent':'border-border bg-white hover:border-primary/50')}>
       <UserAvatar user={g} className="size-14"/><span className="flex-1 font-heading text-2xl font-semibold">{g.displayName}</span>{on&&<CircleCheck aria-hidden className="size-8 text-primary"/>}
      </button>;})}</div>
     </Step>

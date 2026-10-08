@@ -26,13 +26,13 @@ export function DecisionButtons({id,token=false,initialReject=false,onDecided,si
   if(!token){toast.success(decision==='APPROVE'?'อนุมัติแล้ว':'ไม่อนุมัติแล้ว');router.refresh();}
  });
  return <div className="w-full space-y-3" aria-live="polite">
-  {!rejecting?<div className="flex flex-wrap gap-2">
+  {!rejecting?<div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
    <Button size={size} disabled={pending} onClick={()=>decide('APPROVE')}>{pending?<Spinner/>:<Check aria-hidden/>}อนุมัติ</Button>
    <Button size={size} variant="outline" disabled={pending} onClick={()=>setRejecting(true)}><X aria-hidden/>ไม่อนุมัติ</Button>
   </div>:<div className="space-y-3 rounded-xl border border-overdue-border bg-overdue-bg/60 p-4">
    <label htmlFor={'reason-'+id.slice(0,12)} className="block font-medium">เหตุผล (ไม่บังคับ)</label>
    <Textarea id={'reason-'+id.slice(0,12)} value={reason} maxLength={2000} onChange={e=>setReason(e.target.value)} placeholder="เช่น ขอเลื่อนเป็นช่วงบ่าย"/>
-   <div className="flex flex-wrap gap-2">
+   <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-2 sm:flex sm:flex-wrap">
     <Button size={size} variant="destructive" className="bg-destructive text-white hover:bg-destructive/90" disabled={pending} onClick={()=>decide('REJECT')}>{pending&&<Spinner/>}ยืนยันไม่อนุมัติ</Button>
     <Button size={size} variant="outline" disabled={pending} onClick={()=>{setRejecting(false);setReason('');}}>กลับ</Button>
    </div>
@@ -59,9 +59,9 @@ export function RoomBookingActions({booking:b,meId,isAdmin,canDecide=false,onDon
  if(!decide&&!canCancel&&!(b.status==='APPROVED'&&b.isMine&&now.getTime()<millis(b.end))&&!(b.status==='PENDING'&&booker))return null;
  return <div className="space-y-3">
   {decide&&<DecisionButtons id={b.id} onDecided={()=>onDone?.()}/>}
-  <div className="flex flex-wrap gap-2">
-   {b.status==='PENDING'&&booker&&b.approverId&&<Button variant="outline" disabled={pending||nudgeLocked} onClick={()=>run('nudge')}><BellRing aria-hidden/>{nudgeLocked?'เตือนได้อีกครั้ง '+formatTime(nextNudge!):'เตือนหัวหน้า'}</Button>}
-   {b.status==='APPROVED'&&b.isMine&&now.getTime()<millis(b.end)&&<Button variant="outline" asChild><a href={'/rooms/bookings/'+b.id+'/ics'} download><CalendarPlus aria-hidden/>เพิ่มลงปฏิทิน</a></Button>}
+  <div className="grid grid-cols-1 gap-2 has-[[aria-live]]:grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap [&>*]:min-w-0">
+   {b.status==='PENDING'&&booker&&b.approverId&&<Button variant="outline" className="h-auto min-h-12 gap-1.5 whitespace-normal px-2 py-2 leading-tight sm:px-4" disabled={pending||nudgeLocked} onClick={()=>run('nudge')}><BellRing aria-hidden/>{nudgeLocked?'เตือนได้อีกครั้ง '+formatTime(nextNudge!):'เตือนหัวหน้า'}</Button>}
+   {b.status==='APPROVED'&&b.isMine&&now.getTime()<millis(b.end)&&<Button variant="outline" className="h-auto min-h-12 gap-1.5 whitespace-normal px-2 py-2 leading-tight sm:px-4" asChild><a href={'/rooms/bookings/'+b.id+'/ics'} download><CalendarPlus aria-hidden/>เพิ่มลงปฏิทิน</a></Button>}
    {canCancel&&<InlineConfirm label="ยกเลิกการจอง" cancelLabel="ไม่ยกเลิก" question={'ยกเลิกการจอง '+b.room.shortLabel+' '+formatRange(b.start,b.end)+'?'} disabled={pending} onConfirm={()=>run('cancel')}/>}
   </div>
   {error&&<p role="alert" className="text-destructive">{error}</p>}

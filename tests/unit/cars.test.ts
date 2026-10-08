@@ -1,4 +1,4 @@
-﻿import {beforeEach,afterEach,describe,it,expect,vi} from 'vitest';
+import {beforeEach,afterEach,describe,it,expect,vi} from 'vitest';
 import {createMockServices} from '@/shared/data/mock';
 import {resetDb,getDb} from '@/shared/data/mock/store';
 import {runDueJobs} from '@/shared/data/mock/jobs';
@@ -60,5 +60,14 @@ describe('scenario A–E และกฎรถ',()=>{
  expect((await svc('U12',['EMPLOYEE','ADMIN']).carBookings.getById('CB-001')).qrToken).toBeNull();
  await expect(svc('U03').carBookings.getById('CB-001')).rejects.toMatchObject({code:'NOT_FOUND'});
  });
+ it('เตือนล่วงหน้า 1 วัน: ส่งครั้งเดียวเมื่อถึง 24 ชม. ก่อนรับรถ และไม่ส่งถ้าจองกระชั้นชิด',async()=>{
+  const me=svc('U01');
+  const far=await me.carBookings.create({carId:'CAR-06',start:'2026-10-09T02:00:00.000Z',end:'2026-10-10T10:00:00.000Z',purpose:'ไปต่างจังหวัด',destination:'สระบุรี'});
+  const near=await me.carBookings.create({carId:'CAR-09',start:'2026-10-07T05:00:00.000Z',end:'2026-10-07T07:00:00.000Z',purpose:'ส่งเอกสาร',destination:'บางนา'});
+  const type='CAR_DAY_BEFORE_REMINDER',sent=(id:string)=>getDb().mail.filter(m=>m.type===type&&m.bookingId===id);
+  getDb().clockOffsetMs=new Date(far.start).getTime()-24*3600000-60000-base.getTime();await runDueJobs(now());expect(sent(far.id)).toHaveLength(0);
+  getDb().clockOffsetMs=new Date(far.start).getTime()-24*3600000-base.getTime();await runDueJobs(now());await runDueJobs(now());
+  expect(sent(far.id)).toHaveLength(1);expect(sent(far.id)[0].subject).toContain('ทะเบียน กข 1206');expect(sent(far.id)[0].to).toEqual(['somchai.j@example.com']);
+  expect(sent(near.id)).toHaveLength(0);
+ });
 });
-

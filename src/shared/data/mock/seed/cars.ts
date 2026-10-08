@@ -1,4 +1,5 @@
 import type {Car} from '../../types';
+// photoUrl: รูปรถอยู่ที่ public/cars/ (ที่มาและสัญญาอนุญาตดู public/cars/CREDITS.md) ถ้าเป็น null จะแสดงภาพวาดตามประเภทรถ
 export const cars:Car[]=[
   {
     "id": "CAR-01",
@@ -10,7 +11,8 @@ export const cars:Car[]=[
     "keySlot": "01",
     "stationId": "ST-GATE1",
     "currentMileage": 45188,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-01.png"
   },
   {
     "id": "CAR-02",
@@ -22,7 +24,8 @@ export const cars:Car[]=[
     "keySlot": "02",
     "stationId": "ST-GATE1",
     "currentMileage": 38400,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-02.jpg"
   },
   {
     "id": "CAR-03",
@@ -34,7 +37,8 @@ export const cars:Car[]=[
     "keySlot": "03",
     "stationId": "ST-GATE1",
     "currentMileage": 72350,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-03.jpg"
   },
   {
     "id": "CAR-04",
@@ -46,7 +50,8 @@ export const cars:Car[]=[
     "keySlot": "04",
     "stationId": "ST-GATE1",
     "currentMileage": 98210,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-04.jpg"
   },
   {
     "id": "CAR-05",
@@ -58,7 +63,8 @@ export const cars:Car[]=[
     "keySlot": "05",
     "stationId": "ST-GATE1",
     "currentMileage": 61005,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-05.jpg"
   },
   {
     "id": "CAR-06",
@@ -70,7 +76,8 @@ export const cars:Car[]=[
     "keySlot": "06",
     "stationId": "ST-GATE1",
     "currentMileage": 22780,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-06.jpg"
   },
   {
     "id": "CAR-07",
@@ -82,7 +89,8 @@ export const cars:Car[]=[
     "keySlot": "07",
     "stationId": "ST-GATE1",
     "currentMileage": 80540,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-07.jpg"
   },
   {
     "id": "CAR-08",
@@ -94,7 +102,8 @@ export const cars:Car[]=[
     "keySlot": "08",
     "stationId": "ST-GATE1",
     "currentMileage": 15320,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-08.jpg"
   },
   {
     "id": "CAR-09",
@@ -106,7 +115,8 @@ export const cars:Car[]=[
     "keySlot": "09",
     "stationId": "ST-GATE1",
     "currentMileage": 33900,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-09.jpg"
   },
   {
     "id": "CAR-10",
@@ -118,7 +128,8 @@ export const cars:Car[]=[
     "keySlot": "10",
     "stationId": "ST-GATE1",
     "currentMileage": 51640,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-10.jpg"
   },
   {
     "id": "CAR-11",
@@ -130,7 +141,8 @@ export const cars:Car[]=[
     "keySlot": "11",
     "stationId": "ST-GATE1",
     "currentMileage": 67215,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-11.jpg"
   },
   {
     "id": "CAR-12",
@@ -142,6 +154,7 @@ export const cars:Car[]=[
     "keySlot": "12",
     "stationId": "ST-GATE1",
     "currentMileage": 45210,
-    "active": true
+    "active": true,
+    "photoUrl": "/cars/CAR-12.jpg"
   }
 ];

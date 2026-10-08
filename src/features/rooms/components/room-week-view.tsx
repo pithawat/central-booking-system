@@ -4,7 +4,7 @@ import {useRouter} from 'next/navigation';
 import {ChevronLeft,ChevronRight,Plus} from 'lucide-react';
 import type {Building,Room,RoomBookingDetail,Site,User} from '@/shared/data/types';
 import {appConfig} from '@/shared/config/app.config';
-import {addDays,bangkokDateTime,formatDate,formatRange,timeOptions,todayInBangkok} from '@/shared/lib/datetime';
+import {addDays,bangkokDateTime,formatDate,formatDateLong,formatDateShort,formatRange,timeOptions,todayInBangkok,dayParts} from '@/shared/lib/datetime';
 import {millis} from '@/shared/lib/intervals';
 import {useNow} from '@/shared/ui/clock-provider';
 import {useMobile} from '@/shared/ui/responsive-panel';
@@ -13,7 +13,7 @@ import {ToggleGroup,ToggleGroupItem} from '@/components/ui/toggle-group';
 import {daySlots,isPastSlot,percentOfDay,roomFree,slotEnd,weekStart} from '../lib/slots';
 import {blockStyle,blockLabel} from './room-timeline';
 import {RoomDayCard} from './room-mobile-list';
-import {DateNav} from './room-filters';
+import {DateNav,DayStrip} from './room-filters';
 import {BookingSheet} from './booking-sheet';
 import {BookingDetailSheet} from './booking-detail';
 import {useBookingPanels} from './rooms-board';
@@ -27,20 +27,44 @@ export function RoomWeekView({room,building,site,date,view,bookings,today,maxDat
  const go=(patch:{date?:string;view?:string})=>start(()=>router.replace('/rooms/'+room.id+'?'+new URLSearchParams({date,view:mode,...patch}),{scroll:false}));
  const monday=weekStart(date),days=Array.from({length:7},(_,i)=>addDays(monday,i)),thisWeek=weekStart(today);
  const hours=timeOptions(appConfig.room.dayStart,appConfig.room.dayEnd,appConfig.room.slotMinutes).slice(0,-1);
+ const selected=days.includes(date)?date:monday,navBtn='px-4';
+ // เช่น "5 – 11 ต.ค." หรือ "28 ก.ย. – 4 ต.ค." ถ้าข้ามเดือน
+ const dm=(d:string)=>formatDateShort(bangkokDateTime(d,'12:00')).replace(/^\S+\s/,''),first=dm(days[0]),last=dm(days[6]);
+ const weekRange=(first.split(' ')[1]===last.split(' ')[1]?first.split(' ')[0]:first)+' – '+last;
  return <div className="space-y-5">
-  <div className="flex flex-wrap items-center justify-between gap-3">
-   <ToggleGroup type="single" variant="outline" aria-label="มุมมอง" value={mode} onValueChange={v=>{if(v)go({view:v});}} className="bg-white">
-    <ToggleGroupItem value="week" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">สัปดาห์</ToggleGroupItem>
-    <ToggleGroupItem value="day" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">วัน</ToggleGroupItem>
-   </ToggleGroup>
-   {mode==='week'?<div className="flex flex-wrap items-center gap-2">
-    <Button variant="outline" onClick={()=>go({date:addDays(monday,-7)})}><ChevronLeft aria-hidden/>สัปดาห์ก่อน</Button>
-    <Button variant={monday===thisWeek?'secondary':'outline'} onClick={()=>go({date:today})}>สัปดาห์นี้</Button>
-    <Button variant="outline" disabled={addDays(monday,7)>maxDate} onClick={()=>go({date:addDays(monday,7)})}>สัปดาห์ถัดไป<ChevronRight aria-hidden/></Button>
-   </div>:<DateNav compact={mobile} date={date} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/>}
+  <div className="space-y-3">
+   <div className="flex flex-wrap items-center justify-between gap-3">
+    <ToggleGroup type="single" variant="outline" aria-label="มุมมอง" value={mode} onValueChange={v=>{if(v)go({view:v});}} className="grid w-full grid-cols-2 bg-white sm:inline-flex sm:w-auto">
+     <ToggleGroupItem value="week" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">สัปดาห์</ToggleGroupItem>
+     <ToggleGroupItem value="day" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">วัน</ToggleGroupItem>
+    </ToggleGroup>
+    {mode==='week'?<>
+     {/* มือถือ: ปุ่มเลื่อนสัปดาห์แบบ ‹ ช่วงวันที่ › */}
+     <div className="flex w-full items-center gap-1 rounded-2xl border bg-white p-1 shadow-card sm:hidden">
+      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ก่อน" onClick={()=>go({date:addDays(monday,-7)})}><ChevronLeft aria-hidden/></Button>
+      <div className="flex min-w-0 flex-1 flex-col items-center leading-tight"><span className="truncate font-heading text-lg font-semibold tabular-nums">{weekRange}</span>{monday!==thisWeek?<button type="button" onClick={()=>go({date:today})} className="min-h-6 text-sm font-medium text-primary underline underline-offset-2">กลับสัปดาห์นี้</button>:<span className="text-sm text-muted-foreground">สัปดาห์นี้</span>}</div>
+      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ถัดไป" disabled={addDays(monday,7)>maxDate} onClick={()=>go({date:addDays(monday,7)})}><ChevronRight aria-hidden/></Button>
+     </div>
+     <div className="hidden flex-wrap gap-2 sm:flex">
+      <Button variant="outline" className={navBtn} onClick={()=>go({date:addDays(monday,-7)})}><ChevronLeft aria-hidden/>สัปดาห์ก่อน</Button>
+      <Button variant={monday===thisWeek?'secondary':'outline'} className={navBtn} onClick={()=>go({date:today})}>สัปดาห์นี้</Button>
+      <Button variant="outline" className={navBtn} disabled={addDays(monday,7)>maxDate} onClick={()=>go({date:addDays(monday,7)})}>สัปดาห์ถัดไป<ChevronRight aria-hidden/></Button>
+     </div>
+    </>:<div className="w-full sm:w-auto"><DateNav compact={mobile} date={date} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
+   </div>
+   {mode==='day'&&<div className="md:hidden"><DayStrip date={date} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
   </div>
   <div className={pending?'opacity-60 transition-opacity':'transition-opacity'}>
-  {mode==='week'?<>
+  {mode==='week'&&<div className="space-y-3 md:hidden">
+   {/* มือถือ: แถบ 7 วันของสัปดาห์ + ตารางของวันที่เลือก แทนตารางที่ต้องเลื่อนแนวนอน */}
+   <div role="group" aria-label="เลือกวันในสัปดาห์" className="grid grid-cols-7 gap-1">{days.map(d=>{const p=dayParts(bangkokDateTime(d,'12:00')),n=bookings.filter(b=>todayInBangkok(b.start)===d).length,on=d===selected;
+    return <button key={d} type="button" aria-pressed={on} aria-label={formatDateLong(bangkokDateTime(d,'12:00'))+(n?' · การจอง '+n+' รายการ':' · ไม่มีการจอง')} onClick={()=>go({date:d})} className={'flex min-h-16 min-w-0 flex-col items-center justify-center rounded-2xl border transition focus-visible:ring-[3px] focus-visible:ring-ring '+(on?'border-primary bg-primary text-primary-foreground':d===today?'border-primary/40 bg-accent':'bg-white')}>
+     <span className={'text-sm '+(on?'text-primary-foreground/90':'text-muted-foreground')}>{p.weekday}</span><span className="font-heading text-lg font-semibold leading-tight tabular-nums">{p.day}</span>
+     <span aria-hidden className="flex h-2 items-center gap-0.5">{Array.from({length:Math.min(n,3)},(_,i)=><span key={i} className={'size-1.5 rounded-full '+(on?'bg-white':'bg-primary')}/>)}</span>
+    </button>;})}</div>
+   <RoomDayCard room={room} date={selected} title={formatDateLong(bangkokDateTime(selected,'12:00'))} bookings={bookings.filter(b=>todayInBangkok(b.start)===selected)} siteName={site?.name??''} buildingName={building?.name??''} showLink={false} expanded onRange={(r,s,e)=>panels.openSlot(r,selected,s,e)} onBooking={panels.openBooking}/>
+  </div>}
+  {mode==='week'?<div className="hidden md:block">
    <p className="mb-3 font-heading text-lg font-semibold">{formatDate(bangkokDateTime(days[0],'12:00'))} – {formatDate(bangkokDateTime(days[6],'12:00'))}</p>
    <div className="surface overflow-x-auto scrollbar-thin">
     <div className="grid min-w-[760px] grid-cols-[56px_repeat(7,minmax(0,1fr))]">
@@ -62,7 +86,7 @@ export function RoomWeekView({room,building,site,date,view,bookings,today,maxDat
      })}
     </div>
    </div>
-  </>:<div className="max-w-2xl"><RoomDayCard room={room} date={date} bookings={bookings.filter(b=>todayInBangkok(b.start)===date)} siteName={site?.name??''} buildingName={building?.name??''} showLink={false} onRange={(r,s,e)=>panels.openSlot(r,date,s,e)} onBooking={panels.openBooking}/></div>}
+  </div>:<div className="max-w-2xl"><RoomDayCard room={room} date={date} title={formatDateLong(bangkokDateTime(date,'12:00'))} bookings={bookings.filter(b=>todayInBangkok(b.start)===date)} siteName={site?.name??''} buildingName={building?.name??''} showLink={false} expanded onRange={(r,s,e)=>panels.openSlot(r,date,s,e)} onBooking={panels.openBooking}/></div>}
   </div>
   <p className="sr-only" aria-live="polite">{panels.announce}</p>
   <BookingSheet draft={panels.draft} onClose={panels.closeDraft} bookings={bookings} buildings={building?[building]:[]} siteName={()=>site?.name??''} me={me} supervisor={supervisor} onBooked={panels.booked} onCloseAutoFocus={panels.restoreFocus}/>

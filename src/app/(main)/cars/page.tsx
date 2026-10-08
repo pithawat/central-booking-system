@@ -15,10 +15,11 @@ export default async function CarsPage({searchParams}:{searchParams:Promise<Reco
  const after=formatTime(t)>='17:00',defaultDate=after?addDays(todayInBangkok(t),1):todayInBangkok(t);
  const date=z.iso.date().safeParse(q.date).success?q.date!:defaultDate;
  const validTime=(v:string|undefined)=>!!v&&/^([01]\d|2[0-3]):[0-5]\d$/.test(v);
- const start=validTime(q.start)?q.start!:after?'08:00':formatTime(next),end=validTime(q.end)?q.end!:formatTime(addMinutes(bangkokDateTime(date,start),appConfig.car.defaultDurationMinutes));
- const endDate=z.iso.date().safeParse(q.endDate).success?q.endDate!:date,type=CarTypeSchema.safeParse(q.type);
+ const start=validTime(q.start)?q.start!:after?'08:00':formatTime(next);
+ // จองหลายวันเป็นหลัก: ค่าเริ่มต้นคืนรถวันถัดไปตาม defaultReturn
+ const endDate=z.iso.date().safeParse(q.endDate).success?q.endDate!:addDays(date,appConfig.car.defaultReturn.daysAfter),end=validTime(q.end)?q.end!:appConfig.car.defaultReturn.time,type=CarTypeSchema.safeParse(q.type);
  const query={date,start,end,endDate,type:type.success?type.data:''};
  const s=await getServices(),cars=await s.cars.availability({start:bangkokDateTime(date,start).toISOString(),end:bangkokDateTime(endDate,end).toISOString(),type:type.success?type.data:undefined});
- return <><PageHeader icon={Car} title="จองรถ" description="เลือกเวลา แล้วเลือกรถที่ว่าง"/><CarSearch query={query} cars={cars}/></>;
+ return <><PageHeader icon={Car} title="จองรถ" description="เลือกวันรับ-คืนรถ แล้วแตะรถที่ว่าง"/><CarSearch query={query} cars={cars} today={todayInBangkok(t)}/></>;
 }
 

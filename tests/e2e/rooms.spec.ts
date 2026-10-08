@@ -57,3 +57,26 @@ test('ไม่มีการเลื่อนแนวนอนทั้ง�
   }
  }
 });
+
+test('หน้าแท็บเล็ต รปภ. ไม่เลื่อนแนวนอนตั้งแต่มือถือถึงแท็บเล็ต และเปิดกล้องเมื่อกดสแกนเท่านั้น',async({browser})=>{
+ test.setTimeout(300000);
+ for(const width of [375,768,1024,1366]) {
+  const ctx=await browser.newContext({viewport:{width,height:900}}),page=await ctx.newPage();
+  await login(page,/แท็บเล็ตป้อม ประตู 1/);
+  const code=page.getByLabel('หรือพิมพ์รหัส 4 หลัก'),station=page.getByRole('button',{name:'ป้อม รปภ. ประตู 1',exact:true}),guard=page.getByRole('button',{name:/สมศักดิ์ มั่นคง/});
+  await code.or(station).or(guard).first().waitFor();
+  if(await station.isVisible()){await station.click();await code.or(guard).first().waitFor();}
+  if(await guard.isVisible()){await guard.click();await page.getByLabel('PIN 4 หลัก').fill('1234');await page.getByRole('button',{name:'เข้าเวร',exact:true}).click();}
+  await expect(code).toBeAttached();await page.waitForLoadState('networkidle');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth),'/guard @'+width).toBeLessThanOrEqual(0);
+  if(width===1366){
+   await expect(page.getByRole('dialog')).toHaveCount(0);
+   await page.getByRole('button',{name:/สแกน QR/}).click();
+   await expect(page.getByRole('dialog',{name:'สแกน QR'})).toBeVisible();
+   await page.getByRole('button',{name:'ปิดกล้อง',exact:true}).click();
+   await expect(page.getByRole('dialog')).toHaveCount(0);
+   await page.getByRole('tab',{name:/รถที่ออกอยู่/}).click();await expect(page.getByRole('tab',{name:/รถที่ออกอยู่/})).toHaveAttribute('aria-selected','true');
+  }
+  await ctx.close();
+ }
+});

@@ -8,11 +8,13 @@ export const appConfig = {
     timeOptionsStart: '06:00',         // ตัวเลือกเวลาในฟอร์มจองรถ
     timeOptionsEnd: '22:00',
     defaultDurationMinutes: 120,
+    defaultReturn: { daysAfter: 1, time: '17:00' }, // ค่าเริ่มต้นของฟอร์มจอง: คืนรถวันถัดไป 17:00 (จองหลายวันเป็นหลัก)
     minBookingMinutes: 30,
     maxBookingDays: 7,
     pickupEarlyMinutes: 30,            // มารับก่อนเวลาจองได้
     noShowCancelMinutes: 30,           // เลยเวลาเริ่มไปเท่านี้แล้วยังไม่มารับ → ยกเลิกอัตโนมัติ
     reminderBeforePickupMinutes: 30,
+    reminderDayBeforeHours: 24,        // อีเมลเตือนล่วงหน้าก่อนวันรับรถ (ส่งเฉพาะการจองที่จองไว้ก่อนหน้านั้น)
     reminderBeforeReturnMinutes: 30,
     overdueNoticeMinutes: 15,          // เลยเวลาคืนไปเท่านี้ → ส่งอีเมลเตือน
     requireMileageOnReturn: true,
@@ -24,6 +26,7 @@ export const appConfig = {
       { label: 'ครึ่งบ่าย', start: '13:00', end: '17:00' },
       { label: 'ทั้งวัน', start: '08:00', end: '17:00' },
     ],
+    dayPresets: [2, 3, 7],             // ปุ่มลัดจองหลายวัน: วันรับรถถึงวันที่ n เวลา 17:00
   },
 
   guard: {

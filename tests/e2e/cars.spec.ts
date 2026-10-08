@@ -1,4 +1,4 @@
-﻿import {test,expect} from '@playwright/test';
+import {test,expect} from '@playwright/test';
 test('A/B: ผู้จองและป้อมรับ–คืนรถร่วมกัน',async({browser})=>{
  const employee=await browser.newContext(),station=await browser.newContext(),p=await employee.newPage(),g=await station.newPage();
  await p.goto('/login');await p.getByRole('button',{name:/สมชาย ใจดี/}).click();
@@ -10,7 +10,7 @@ test('A/B: ผู้จองและป้อมรับ–คืนรถร
  await expect(p.getByRole('heading',{name:/กำลังใช้รถ #12/})).toBeVisible({timeout:15000});
  await p.getByRole('button',{name:'คืนรถ',exact:true}).click();await p.getByLabel('เลขไมล์',{exact:true}).fill('40000');await p.getByRole('button',{name:'บันทึก แล้วนำกุญแจไปคืนที่ป้อม'}).click();await expect(p.getByText('เลขไมล์ต้องไม่น้อยกว่า 45,210')).toBeVisible();
  await p.getByLabel('เลขไมล์',{exact:true}).fill('45260');await p.getByRole('button',{name:'บันทึก แล้วนำกุญแจไปคืนที่ป้อม'}).click();await expect(p.getByText('บันทึกเลขไมล์แล้ว นำกุญแจไปคืนที่ป้อม')).toBeVisible();
- await g.getByRole('button',{name:/#12 · สมชาย ใจดี/}).click();await expect(g.getByText('เลขไมล์ 45,260 กม.')).toBeVisible();await g.getByRole('button',{name:'รับกุญแจคืน',exact:true}).click();await expect(g.getByText(/รับกุญแจคืนแล้ว/)).toBeVisible();
+ await g.getByRole('tab',{name:/รถที่ออกอยู่/}).click();await g.getByRole('button',{name:/#12 · สมชาย ใจดี/}).click();await expect(g.getByText('เลขไมล์ 45,260 กม.')).toBeVisible();await g.getByRole('button',{name:'รับกุญแจคืน',exact:true}).click();await expect(g.getByText(/รับกุญแจคืนแล้ว/)).toBeVisible();
  await employee.close();await station.close();
 });
 
