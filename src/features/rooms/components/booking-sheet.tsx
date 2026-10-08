@@ -120,7 +120,7 @@ function AttendeePicker({value,me,onChange}:{value:User;me:User;onChange:(u:User
    <Search size={18} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"/>
    <Input id="attendee-search" role="combobox" aria-expanded={!!q.trim()} aria-controls="attendee-results" autoComplete="off" className="pl-10" placeholder="ค้นหาชื่อ แผนก หรือรหัสพนักงาน" value={q} onChange={e=>{setQ(e.target.value);if(!e.target.value.trim())setResults([]);}}/>
   </div>
-  {q.trim()&&<ul id="attendee-results" role="listbox" aria-label="ผลการค้นหาพนักงาน" className="max-h-64 overflow-y-auto rounded-xl border p-1">
+  {q.trim()&&<ul id="attendee-results" role="listbox" aria-label="ผลการค้นหาพนักงาน" className="max-h-64 overflow-y-auto overscroll-contain rounded-xl border p-1.5 pe-2.5 scrollbar-thin">
    {results.map(u=><li key={u.id} role="option" aria-selected={u.id===value.id}><button type="button" className="flex min-h-12 w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-accent focus-visible:bg-accent" onClick={()=>{onChange(u);setQ('');setResults([]);}}><UserAvatar user={u} className="size-8"/><span className="min-w-0"><span className="block truncate">{u.displayName}</span><span className="block truncate text-sm text-muted-foreground">{u.departmentName} · {u.employeeCode}</span></span></button></li>)}
    {!results.length&&<li className="p-3 text-muted-foreground">{searching?'กำลังค้นหา…':'ไม่พบพนักงาน'}</li>}
   </ul>}

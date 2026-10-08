@@ -21,7 +21,7 @@ function CarDrawing({type}:{type:CarType}) {
 }
 
 /** รูปรถ: ใช้รูปจริงจาก photoUrl ถ้าโหลดไม่ได้หรือไม่มีจะแสดงภาพวาดตามประเภท */
-export function CarPhoto({car,className='',sizes='(max-width:640px) 40vw, 360px'}:{car:Pick<Car,'photoUrl'|'type'|'model'|'plate'>;className?:string;sizes?:string}) {
+export function CarPhoto({car,className='',sizes='(max-width:640px) 50vw, 360px'}:{car:Pick<Car,'photoUrl'|'type'|'model'|'plate'>;className?:string;sizes?:string}) {
  const [failed,setFailed]=useState(false);
  const real=car.photoUrl&&!failed;
  return <div className={'relative overflow-hidden bg-linear-to-br from-slate-50 to-slate-100 '+className}>
@@ -31,7 +31,8 @@ export function CarPhoto({car,className='',sizes='(max-width:640px) 40vw, 360px'
  </div>;
 }
 
-const plateSizes={sm:'px-2 py-0.5 text-base border-[1.5px]',md:'px-3 py-1 text-xl border-2',lg:'px-4 py-1.5 text-2xl border-2',xl:'px-5 py-2 text-4xl border-[3px]'};
+// card: ขนาดตามความกว้างการ์ด (ต้องอยู่ใน @container) การ์ด 2 คอลัมน์บนมือถือได้ป้ายพอดี จอใหญ่เท่าขนาด lg
+const plateSizes={sm:'px-2 py-0.5 text-base border-[1.5px]',md:'px-3 py-1 text-xl border-2',lg:'px-4 py-1.5 text-2xl border-2',xl:'px-5 py-2 text-4xl border-[3px]',card:'px-2.5 py-1 text-[clamp(1.0625rem,13cqi,1.5rem)] border-2 sm:px-4 sm:py-1.5'};
 /** ป้ายทะเบียนแบบป้ายรถไทย ใช้เป็นข้อมูลหลักของรถ */
 export function LicensePlate({plate,size='md',className=''}:{plate:string;size?:keyof typeof plateSizes;className?:string}) {
  return <span aria-label={'ทะเบียน '+plate} className={'inline-flex items-center whitespace-nowrap rounded-lg border-slate-800 bg-white font-heading font-bold leading-none tracking-wide text-slate-900 shadow-[inset_0_0_0_2px_#fff,0_1px_2px_rgb(15_23_42/.15)] '+plateSizes[size]+' '+className}>{plate}</span>;

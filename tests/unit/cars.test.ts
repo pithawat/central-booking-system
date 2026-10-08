@@ -67,7 +67,7 @@ describe('scenario A–E และกฎรถ',()=>{
   const type='CAR_DAY_BEFORE_REMINDER',sent=(id:string)=>getDb().mail.filter(m=>m.type===type&&m.bookingId===id);
   getDb().clockOffsetMs=new Date(far.start).getTime()-24*3600000-60000-base.getTime();await runDueJobs(now());expect(sent(far.id)).toHaveLength(0);
   getDb().clockOffsetMs=new Date(far.start).getTime()-24*3600000-base.getTime();await runDueJobs(now());await runDueJobs(now());
-  expect(sent(far.id)).toHaveLength(1);expect(sent(far.id)[0].subject).toContain('ทะเบียน กข 1206');expect(sent(far.id)[0].to).toEqual(['somchai.j@example.com']);
+  expect(sent(far.id)).toHaveLength(1);expect(sent(far.id)[0].subject).toContain('ทะเบียน กข 1206');expect(sent(far.id)[0].text).toContain('ฝั่ง Office · ป้อม รปภ. ประตู 1');expect(sent(far.id)[0].to).toEqual(['somchai.j@example.com']);
   expect(sent(near.id)).toHaveLength(0);
  });
 });

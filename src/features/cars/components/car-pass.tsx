@@ -3,13 +3,14 @@ import {useState,useTransition,useEffect,useRef} from 'react';
 import {useRouter} from 'next/navigation';
 import {QRCodeSVG} from 'qrcode.react';
 import {toast} from 'sonner';
-import {Maximize2,KeyRound,CalendarClock,TriangleAlert} from 'lucide-react';
+import {Maximize2,KeyRound,CalendarClock,TriangleAlert,MapPinned} from 'lucide-react';
 import type {CarBookingDetail} from '@/shared/data/types';
 import {appConfig} from '@/shared/config/app.config';
 import {formatDate,formatDateShort,formatTime,formatMileage,formatRelative,bangkokDateTime,todayInBangkok,timeOptions,addDays} from '@/shared/lib/datetime';
 import {useNow} from '@/shared/ui/clock-provider';
 import {useAutoRefresh} from '@/shared/ui/use-auto-refresh';
 import {ResponsivePanel} from '@/shared/ui/responsive-panel';
+import {placeLabel,type CarPlace} from '../lib/places';
 import {InlineConfirm} from '@/shared/ui/inline-confirm';
 import {StatusBadge} from '@/shared/ui/status-badge';
 import {Button} from '@/components/ui/button';
@@ -26,7 +27,7 @@ function When({label,icon:Icon,iso}:{label:string;icon:typeof KeyRound;iso:strin
 }
 
 /** บัตรรับรถ (§8.3) · compact = ใช้บนหน้าแรก: QR เป็นภาพย่อ แตะเพื่อขยายเต็มจอ */
-export function CarPass({booking:b,owner=true,compact=false}:{booking:CarBookingDetail;owner?:boolean;compact?:boolean}) {
+export function CarPass({booking:b,owner=true,compact=false,place}:{booking:CarBookingDetail;owner?:boolean;compact?:boolean;place?:CarPlace}) {
  const now=useNow(),router=useRouter(),[panel,setPanel]=useState<'return'|'extend'|'full'|null>(null),[mileage,setMileage]=useState(b.endMileage?.toString()??''),[issue,setIssue]=useState(''),[hasIssue,setHasIssue]=useState(false),[error,setError]=useState(''),[confirmJump,setConfirmJump]=useState(false),[pending,start]=useTransition();
  const previous=useRef(b.status),active=['CONFIRMED','IN_USE'].includes(b.status),inUse=b.status==='IN_USE',overdue=inUse&&now>new Date(b.end);
  const availableFrom=new Date(new Date(b.start).getTime()-appConfig.car.pickupEarlyMinutes*60000),early=now<availableFrom;
@@ -37,7 +38,7 @@ export function CarPass({booking:b,owner=true,compact=false}:{booking:CarBooking
  const ends=Array.from({length:appConfig.car.maxBookingDays+1},(_,day)=>timeOptions(appConfig.car.timeOptionsStart,appConfig.car.timeOptionsEnd).map(t=>bangkokDateTime(addDays(todayInBangkok(b.end),day),t).toISOString())).flat().filter(t=>t>b.end&&new Date(t)>now&&new Date(t).getTime()-new Date(b.start).getTime()<=appConfig.car.maxBookingDays*86400000&&(!b.nextBookingStart||t<=b.nextBookingStart));
  const qr=b.qrToken&&appConfig.car.showQr,showCode=active&&owner;
  const title=inUse?'กำลังใช้รถ #'+b.car.number+' · คืนภายใน '+formatTime(b.end):'บัตรรับรถ #'+b.car.number;
- const hint=inUse?'ใช้ QR นี้ตอนคืนรถได้':'ยื่น QR หรือบอกรหัสนี้กับ รปภ. ที่ ป้อม รปภ. ประตู 1';
+ const hint=inUse?'ใช้ QR นี้ตอนคืนรถได้':'ยื่น QR หรือบอกรหัสนี้กับ รปภ. ที่ '+(place?.station??'ป้อม รปภ.');
  return <section className={'surface overflow-hidden border-primary/25 '+(compact?'':'mb-6')}>
   {overdue&&<p className="flex items-center gap-2 bg-overdue-bg px-4 py-3 font-medium text-overdue"><TriangleAlert aria-hidden className="size-5"/>เกินเวลาคืน {formatRelative(b.end,now).replace('เกิน ','')}</p>}
   <div className="space-y-4 p-4 sm:p-5">
@@ -50,6 +51,7 @@ export function CarPass({booking:b,owner=true,compact=false}:{booking:CarBooking
     </div>
    </div>
    <div className="grid grid-cols-2 gap-2"><When label="รับรถ" icon={KeyRound} iso={b.start}/><When label="คืนรถ" icon={CalendarClock} iso={b.end}/></div>
+   <p className="flex items-start gap-2 rounded-2xl border border-primary/15 bg-accent/50 px-3 py-2.5"><MapPinned aria-hidden className="mt-0.5 size-5 shrink-0 text-primary"/><span className="min-w-0"><span className="text-muted-foreground">รับ-คืนรถที่ </span><span className="font-medium">{placeLabel(place)}</span></span></p>
 
    {showCode&&(compact?
     <div className="flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-3 min-[360px]:gap-4">

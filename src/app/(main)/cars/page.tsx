@@ -9,6 +9,7 @@ import {CarTypeSchema} from '@/shared/data/schemas';
 import {Car} from 'lucide-react';
 import {PageHeader} from '@/shared/ui/page-header';
 import {CarSearch} from '@/features/cars/components/car-search';
+import {loadCarPlaces} from '@/features/cars/lib/load-places';
 import {bangkokDateTime} from '@/shared/lib/datetime';
 export default async function CarsPage({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}) {
  requireFeature('cars');await requireUser();const q=await searchParams,t=now(),next=ceilSlot(addMinutes(t,0.01),appConfig.car.slotMinutes);
@@ -19,7 +20,7 @@ export default async function CarsPage({searchParams}:{searchParams:Promise<Reco
  // จองหลายวันเป็นหลัก: ค่าเริ่มต้นคืนรถวันถัดไปตาม defaultReturn
  const endDate=z.iso.date().safeParse(q.endDate).success?q.endDate!:addDays(date,appConfig.car.defaultReturn.daysAfter),end=validTime(q.end)?q.end!:appConfig.car.defaultReturn.time,type=CarTypeSchema.safeParse(q.type);
  const query={date,start,end,endDate,type:type.success?type.data:''};
- const s=await getServices(),cars=await s.cars.availability({start:bangkokDateTime(date,start).toISOString(),end:bangkokDateTime(endDate,end).toISOString(),type:type.success?type.data:undefined});
- return <><PageHeader icon={Car} title="จองรถ" description="เลือกวันรับ-คืนรถ แล้วแตะรถที่ว่าง"/><CarSearch query={query} cars={cars} today={todayInBangkok(t)}/></>;
+ const s=await getServices(),[cars,places]=await Promise.all([s.cars.availability({start:bangkokDateTime(date,start).toISOString(),end:bangkokDateTime(endDate,end).toISOString(),type:type.success?type.data:undefined}),loadCarPlaces(s)]);
+ return <><PageHeader icon={Car} title="จองรถ" description="เลือกวันรับ-คืนรถ แล้วแตะรถที่ว่าง"/><CarSearch query={query} cars={cars} today={todayInBangkok(t)} places={places}/></>;
 }
 

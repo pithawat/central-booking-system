@@ -42,7 +42,8 @@ export function createGuardService(c:Context):GuardService {
  return {kind:'PICKUP',booking};
  }
  return {
- stations:()=>c.run(()=>{c.feature('cars');const me=c.allow(['STATION','ADMIN']);return getDb().stations.filter(s=>me.roles.includes('ADMIN')||s.id===me.stationId);}),
+ // พนักงานอ่านรายชื่อป้อมได้ (ชื่อ + ฝั่ง) เพื่อแสดงจุดรับ-คืนรถ ส่วนแท็บเล็ตป้อมยังเห็นเฉพาะป้อมของตัวเอง
+ stations:()=>c.run(()=>{c.feature('cars');const me=c.allow(['EMPLOYEE','STATION','ADMIN']);return getDb().stations.filter(s=>!me.roles.includes('STATION')||me.roles.includes('ADMIN')||s.id===me.stationId);}),
  guardsOf:id=>c.run(()=>{station(id);return getDb().users.filter(u=>u.stationId===id&&u.roles.includes('GUARD'));}),
  activeShift:id=>c.run(()=>{station(id);const s=active(id);return s?{...s,guard:c.find(getDb().users,s.guardId)}:null;}),
  startShift:input=>c.run(()=>{const v=shiftSchema.parse(input);station(v.stationId);const key='pin:'+v.stationId;rate(key);const guard=c.find(getDb().users,v.guardId);if(guard.stationId!==v.stationId||!guard.roles.includes('GUARD'))throw new ServiceError('FORBIDDEN');if(getDb().guardPins[v.guardId]!==v.pin){rate(key,true);throw new ServiceError('VALIDATION','PIN ไม่ถูกต้อง');}if(active(v.stationId))throw new ServiceError('CONFLICT');const s={id:randomUUID(),stationId:v.stationId,guardId:v.guardId,startedAt:now().toISOString(),endedAt:null};getDb().shifts.push(s);delete getDb().attempts[key];return s;}),

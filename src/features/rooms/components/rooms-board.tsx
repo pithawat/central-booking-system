@@ -1,5 +1,5 @@
 'use client';
-import {useRef,useState,useTransition} from 'react';
+import {useOptimistic,useRef,useState,useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import {toast} from 'sonner';
 import {SearchX} from 'lucide-react';
@@ -33,21 +33,23 @@ export function useBookingPanels(bookings:RoomBookingDetail[]) {
 type Props={schedule:RoomDaySchedule;query:RoomQuery;today:string;maxDate:string;me:User;supervisor:User|null};
 export function RoomsBoard({schedule,query,today,maxDate,me,supervisor}:Props) {
  const router=useRouter(),[pending,start]=useTransition(),panels=useBookingPanels(schedule.bookings);
+ // ตัวเลือกวันและตัวกรองแสดงค่าใหม่ทันทีระหว่างโหลด กด ‹ › ติดกันหลายครั้งจึงนับต่อจากค่าล่าสุด (ข้อมูลตารางยังเป็นของจริงจากเซิร์ฟเวอร์)
+ const [shown,setShown]=useOptimistic(query);
  useAutoRefresh(!panels.draft);
  const navigate=(patch:Partial<RoomQuery>)=>{
-  const next={...query,...patch},params=new URLSearchParams({date:next.date,site:next.site});
-  if(next.cap)params.set('cap',String(next.cap));if(next.tv)params.set('tv','1');
-  start(()=>router.replace('/rooms?'+params,{scroll:false}));
+  const next={...shown,...patch},params=new URLSearchParams({date:next.date,site:next.site});
+  if(next.building)params.set('building',next.building);if(next.cap)params.set('cap',String(next.cap));if(next.tv)params.set('tv','1');
+  start(()=>{setShown(next);router.replace('/rooms?'+params,{scroll:false});});
  };
  const siteName=(id:string)=>schedule.sites.find(s=>s.id===id)?.name??'';
  const buildings:Building[]=schedule.buildings;
  const common={date:schedule.date,rooms:schedule.rooms,buildings,sites:schedule.sites,bookings:schedule.bookings,onBooking:panels.openBooking};
  return <div className="space-y-5">
-  <RoomFilters query={query} sites={schedule.sites} today={today} maxDate={maxDate} onChange={navigate}/>
+  <RoomFilters query={shown} sites={schedule.sites} buildings={schedule.buildings} today={today} maxDate={maxDate} onChange={navigate}/>
   <div className="flex flex-wrap items-center justify-between gap-3"><Legend/><p className="text-sm text-muted-foreground" aria-live="polite">{pending?'กำลังโหลด…':'แสดง '+schedule.rooms.length+' ห้อง'}</p></div>
   <p className="sr-only" aria-live="polite">{panels.announce}</p>
   <div className={pending?'opacity-60 transition-opacity':'transition-opacity'}>
-   {schedule.rooms.length===0?<EmptyState icon={SearchX} title="ไม่มีห้องที่ตรงกับตัวกรอง" description="ลองลดจำนวนคน หรือเลือกฝั่งอื่น"><Button onClick={()=>navigate({site:'all',cap:0,tv:false})}>ล้างตัวกรอง</Button></EmptyState>:<>
+   {schedule.rooms.length===0?<EmptyState icon={SearchX} title="ไม่มีห้องที่ตรงกับตัวกรอง" description="ลองลดจำนวนคน หรือเลือกฝั่งหรืออาคารอื่น"><Button onClick={()=>navigate({site:'all',building:'',cap:0,tv:false})}>ล้างตัวกรอง</Button></EmptyState>:<>
     <div className="hidden md:block"><RoomTimeline {...common} onSlot={(room,slot)=>panels.openSlot(room,schedule.date,slot)}/></div>
     <div className="md:hidden"><RoomMobileList {...common} onRange={(room,s,e)=>panels.openSlot(room,schedule.date,s,e)}/></div>
    </>}

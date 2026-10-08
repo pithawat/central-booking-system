@@ -45,7 +45,7 @@ export function RoomTimeline({date,rooms,buildings,sites,bookings,onSlot,onBooki
  const showNow=todayInBangkok(now)===date&&now.getTime()>=dayStart&&now.getTime()<=dayEnd,nowPct=percentOfDay(date,now.getTime());
  const siteName=(id:string)=>sites.find(s=>s.id===id)?.name??'';
  const nowLine=showNow&&<span aria-hidden className="pointer-events-none absolute inset-y-0 z-[3] w-0.5 -translate-x-1/2 bg-primary" style={{left:nowPct+'%'}}/>;
- return <div className="surface overflow-x-auto scrollbar-thin lg:overflow-x-visible">
+ return <div className="surface overflow-x-auto pb-3 scrollbar-thin lg:overflow-x-visible lg:pb-0">
   <div className="min-w-[1080px] lg:min-w-0">
    <div className="grid grid-cols-[240px_minmax(0,1fr)] border-b bg-muted/50">
     <div className="sticky left-0 z-10 border-r bg-[#f8fafc] px-4 py-4 text-sm font-medium text-muted-foreground">ห้อง</div>

@@ -32,7 +32,7 @@ export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}
      <span className="sr-only"> {name} · หน้าแรก</span>
     </Link>
     <nav aria-label="เมนูหลัก" className="desktop-nav hidden h-full md:flex items-stretch gap-0.5">
-     {menu.map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'group relative flex items-center gap-1.5 px-3 text-sm font-medium transition-colors '+(active(m.href)?'text-primary':'text-muted-foreground hover:text-foreground')}>
+     {menu.map(m=><Link key={m.href} href={m.href} aria-current={active(m.href)?'page':undefined} className={'group relative items-center gap-1.5 whitespace-nowrap px-3 text-sm font-medium transition-colors '+(m.href==='/admin/key-log'?'hidden lg:flex ':'flex ')+(active(m.href)?'text-primary':'text-muted-foreground hover:text-foreground')}>
       <span className={'flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors '+(active(m.href)?'bg-accent':'group-hover:bg-muted')}>
        <m.icon size={18} aria-hidden/>
        <span className="xl:hidden">{m.short}</span><span className="hidden xl:inline">{m.label}</span>
@@ -44,7 +44,7 @@ export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}
     <DropdownMenu>
      <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="h-12 gap-2 rounded-full px-1.5 lg:pr-3">
-       <UserAvatar user={user} className="size-9"/>
+       <UserAvatar user={user} variant="brand" className="size-9"/>
        <span className="hidden lg:inline font-medium">{user.firstName}</span>
        <ChevronDown aria-hidden className="hidden lg:block text-muted-foreground"/>
        <span className="sr-only">เมนูผู้ใช้</span>
@@ -52,12 +52,12 @@ export function AppShell({user,name,cars,rooms,supervisor,pending,mock,children}
      </DropdownMenuTrigger>
      <DropdownMenuContent align="end" className="w-64 p-1.5">
       <DropdownMenuLabel className="flex items-center gap-3 p-2">
-       <UserAvatar user={user} className="size-10"/>
+       <UserAvatar user={user} variant="brand" className="size-10"/>
        <span className="min-w-0"><span className="block truncate font-heading text-base font-semibold text-foreground">{user.displayName}</span><span className="block truncate text-sm font-normal text-muted-foreground">{user.departmentName}</span></span>
       </DropdownMenuLabel>
       <DropdownMenuSeparator/>
-      {/* บนมือถือแถบล่างไม่มีรายงานกุญแจ จึงให้ ADMIN เข้าจากเมนูผู้ใช้ */}
-      {cars&&user.roles.includes('ADMIN')&&<DropdownMenuItem asChild className="md:hidden"><Link className="min-h-12 gap-2 text-base" href="/admin/key-log"><KeyRound aria-hidden/>รายงานกุญแจ</Link></DropdownMenuItem>}
+      {/* จอต่ำกว่า 1024px แถบเมนูไม่มีที่ให้รายงานกุญแจ (มือถือ = แถบล่าง, แท็บเล็ต = โลโก้ + 5 เมนู) จึงให้ ADMIN เข้าจากเมนูผู้ใช้ */}
+      {cars&&user.roles.includes('ADMIN')&&<DropdownMenuItem asChild className="lg:hidden"><Link className="min-h-12 gap-2 text-base" href="/admin/key-log"><KeyRound aria-hidden/>รายงานกุญแจ</Link></DropdownMenuItem>}
       {mock&&<DropdownMenuItem asChild><Link className="min-h-12 gap-2 text-base" href="/login"><Users aria-hidden/>สลับผู้ใช้ทดสอบ</Link></DropdownMenuItem>}
       <DropdownMenuItem asChild><form action={signOut}><button className="flex w-full min-h-12 items-center gap-2 text-base"><LogOut aria-hidden/>ออกจากระบบ</button></form></DropdownMenuItem>
      </DropdownMenuContent>

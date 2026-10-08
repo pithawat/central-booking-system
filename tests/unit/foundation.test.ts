@@ -1,6 +1,7 @@
 ﻿import {describe,it,expect} from 'vitest';
 import {formatDate,formatTime,formatPeriod,periodParts,bangkokDateTime,todayInBangkok} from '@/shared/lib/datetime';
 import {overlaps} from '@/shared/lib/intervals';
+import {toPlaces,placeLabel,placeSite} from '@/features/cars/lib/places';
 import {createSeed} from '@/shared/data/mock/store';
 import {UserSchema,RoomSchema,CarSchema,CarBookingSchema,RoomBookingSchema} from '@/shared/data/schemas';
 describe('เวลาไทย',()=>{
@@ -15,4 +16,6 @@ describe('ข้อมูลตั้งต้น',()=>{
  it('ทุกคำขอใช้หัวหน้าผู้จอง',()=>{for(const b of db.roomBookings.filter(b=>b.status==='PENDING'))expect(b.approverId).toBe(db.users.find(u=>u.id===b.bookedById)?.supervisorId);});
  it('filler ทำซ้ำได้',()=>{expect(createSeed(new Date('2026-10-07T02:30:00Z')).roomBookings).toEqual(db.roomBookings);});
 });
-
+describe('จุดรับ-คืนรถ',()=>{
+ it('บอกฝั่งของป้อมประจำรถ ทั้งฝั่ง Office และฝั่งโรงงาน',()=>{const p=toPlaces([{id:'ST-GATE1',name:'ป้อม รปภ. ประตู 1',siteId:'SITE-OFFICE'},{id:'ST-BS',name:'ป้อม รปภ. โรงงาน',siteId:'SITE-BANGSON'}],[{id:'SITE-OFFICE',name:'ฝั่ง Office'},{id:'SITE-BANGSON',name:'ฝั่งโรงงานบางซ่อน'}]);expect(placeLabel(p['ST-GATE1'])).toBe('ฝั่ง Office · ป้อม รปภ. ประตู 1');expect(placeSite(p['ST-BS'])).toBe('ฝั่งโรงงานบางซ่อน');expect(placeLabel(undefined)).toBe('ป้อม รปภ.');});
+});

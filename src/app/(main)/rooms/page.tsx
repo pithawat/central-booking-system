@@ -15,6 +15,10 @@ export default async function RoomsPage({searchParams}:{searchParams:Promise<Rec
  const sites=await s.rooms.sites();
  const site=q.site==='all'?'all':sites.some(x=>x.id===q.site)?q.site!:sites.some(x=>x.id===me.defaultSiteId)?me.defaultSiteId:'all';
  const cap=capacityValues.includes(Number(q.cap))?Number(q.cap):0,tv=q.tv==='1';
- const [schedule,supervisor]=await Promise.all([s.roomBookings.daySchedule(date,{siteId:site==='all'?undefined:site,minCapacity:cap||undefined,tvOnly:tv||undefined}),appConfig.room.approval.enabled?s.users.supervisorOf(me.id):null]);
- return <><PageHeader icon={CalendarDays} title="จองห้องประชุม" description="แตะช่องว่างในตารางเพื่อจอง ระบบส่งขออนุมัติให้หัวหน้าเอง"/><RoomsBoard schedule={schedule} query={{date,site,cap,tv}} today={today} maxDate={maxDate} me={me} supervisor={supervisor}/></>;
+ const [day,supervisor]=await Promise.all([s.roomBookings.daySchedule(date,{siteId:site==='all'?undefined:site,minCapacity:cap||undefined,tvOnly:tv||undefined}),appConfig.room.approval.enabled?s.users.supervisorOf(me.id):null]);
+ // ตัวกรองอาคาร: รับเฉพาะอาคารของฝั่งที่เลือก และกรองในหน้านี้ จึงไม่ต้องเปลี่ยนสัญญา API (RoomFilter มีแค่ฝั่ง จำนวนคน จอทีวี)
+ const building=site!=='all'&&day.buildings.some(b=>b.id===q.building&&b.siteId===site)?q.building!:'';
+ const rooms=building?day.rooms.filter(r=>r.buildingId===building):day.rooms,ids=new Set(rooms.map(r=>r.id));
+ const schedule=building?{...day,rooms,bookings:day.bookings.filter(b=>ids.has(b.roomId))}:day;
+ return <><PageHeader icon={CalendarDays} title="จองห้องประชุม" description="แตะช่องว่างในตารางเพื่อจอง ระบบส่งขออนุมัติให้หัวหน้าเอง"/><RoomsBoard schedule={schedule} query={{date,site,building,cap,tv}} today={today} maxDate={maxDate} me={me} supervisor={supervisor}/></>;
 }

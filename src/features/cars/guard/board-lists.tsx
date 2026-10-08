@@ -25,7 +25,7 @@ export function BoardLists({board,time,onPick}:{board:{waiting:CarBookingDetail[
    </button>)}
   </div>
   <p className="px-4 pb-2 text-base text-muted-foreground">{current.hint}</p>
-  <div id="board-panel" role="tabpanel" aria-labelledby={'tab-'+tab} className="min-h-0 flex-1 overflow-y-auto border-t">
+  <div id="board-panel" role="tabpanel" aria-labelledby={'tab-'+tab} className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t scrollbar-thin">
    {tab==='waiting'?(board.waiting.length?<ul className="divide-y">{board.waiting.map(b=>{
     const ready=time.getTime()>=millis(b.start)-appConfig.car.pickupEarlyMinutes*60000,keyOut=board.out.some(x=>x.carId===b.carId);
     return <li key={b.id}><button type="button" onClick={()=>onPick(b,'waiting')} aria-label={formatTime(b.start)+' · #'+b.car.number+' · '+b.user.displayName+(ready?' · ถึงเวลารับ':'')+(keyOut?' · กุญแจยังไม่คืน':'')} className={rowClass+(ready?' bg-accent':'')}>

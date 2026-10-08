@@ -9,8 +9,8 @@ import {carToken,approvalToken} from '@/shared/lib/tokens';
 import {env} from '@/shared/config/env';
 export async function notifyCar(type:string,id:string) {
  const db=getDb(),b=db.carBookings.find(b=>b.id===id)!,car=db.cars.find(c=>c.id===b.carId)!,user=db.users.find(u=>u.id===b.userId)!;
- const qr=await qrImage(carToken(id));
- await MailService.send({to:[user.email],type,bookingId:id,...carTemplate(type,b,car,env.APP_BASE_URL+'/cars/bookings/'+id,env.MAIL_MODE==='smtp'?'cid:qr':qr),attachments:env.MAIL_MODE==='smtp'?[{filename:'qr.png',contentType:'image/png',contentBase64:qr.split(',')[1],cid:'qr'}]:undefined});
+ const qr=await qrImage(carToken(id)),st=db.stations.find(x=>x.id===car.stationId),place=st?{station:st.name,site:db.sites.find(x=>x.id===st.siteId)?.name??''}:undefined;
+ await MailService.send({to:[user.email],type,bookingId:id,...carTemplate(type,b,car,env.APP_BASE_URL+'/cars/bookings/'+id,env.MAIL_MODE==='smtp'?'cid:qr':qr,place),attachments:env.MAIL_MODE==='smtp'?[{filename:'qr.png',contentType:'image/png',contentBase64:qr.split(',')[1],cid:'qr'}]:undefined});
 }
 export async function notifyRoom(type:string,id:string) {
  const db=getDb(),b=db.roomBookings.find(b=>b.id===id)!,room=db.rooms.find(r=>r.id===b.roomId)!,booker=db.users.find(u=>u.id===b.bookedById)!,attendee=db.users.find(u=>u.id===b.attendeeId)!;

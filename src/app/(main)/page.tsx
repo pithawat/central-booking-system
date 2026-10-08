@@ -3,16 +3,14 @@ import {Car,CalendarDays,ChevronRight,DoorOpen,BellRing,CalendarClock,ArrowUpRig
 import {CarPass} from '@/features/cars/components/car-pass';
 import {MyCarBookingCard} from '@/features/cars/components/my-car-bookings';
 import {LicensePlate} from '@/features/cars/components/car-visual';
+import {loadCarPlaces} from '@/features/cars/lib/load-places';
 import {requireUser} from '@/shared/auth/require';
 import {getServices} from '@/shared/data';
 import {env} from '@/shared/config/env';
 import {appConfig} from '@/shared/config/app.config';
-import {now} from '@/shared/lib/clock';
-import {formatDate,formatDateLong} from '@/shared/lib/datetime';
 import {PeriodText} from '@/shared/ui/period-text';
 import {StatusBadge} from '@/shared/ui/status-badge';
 import {EmptyState} from '@/shared/ui/empty-state';
-import {Button} from '@/components/ui/button';
 
 function SectionTitle({id,icon:Icon,title,href,link}:{id:string;icon:typeof Car;title:string;href?:string;link?:string}) {
  return <div className="mb-3 flex items-center justify-between gap-3"><h2 id={id} className="flex min-w-0 items-center gap-2 text-lg sm:text-xl"><Icon aria-hidden className="size-5 shrink-0 text-primary"/>{title}</h2>{href&&<Link href={href} className="inline-flex min-h-11 shrink-0 items-center gap-0.5 font-medium text-primary">{link}<span className="sr-only"> · {title}</span><ChevronRight aria-hidden className="size-4"/></Link>}</div>;
@@ -26,32 +24,29 @@ export default async function HomePage() {
  const nextCar=pass?null:carList[0]??null,shown=pass?.id??nextCar?.id;
  const upcoming=[...carList.filter(b=>b.id!==shown).map(b=>({id:b.id,kind:'car' as const,start:b.start,end:b.end,title:b.purpose,lead:<LicensePlate plate={b.car.plate} size="sm"/>,badge:<StatusBadge kind="car" status={b.status}/>,href:'/cars/bookings/'+b.id,label:'รถ #'+b.car.number+' ทะเบียน '+b.car.plate+' · '+b.purpose})),...roomList.map(b=>({id:b.id,kind:'room' as const,start:b.start,end:b.end,title:b.title,lead:<span className="truncate text-sm font-medium text-indigo-700">{b.room.shortLabel}</span>,badge:<StatusBadge kind="room" status={b.status}/>,href:'/rooms/bookings/'+b.id,label:b.room.shortLabel+' · '+b.title}))].sort((a,b)=>a.start.localeCompare(b.start)).slice(0,5);
  const actions=[...(cars?[{href:'/cars',title:'จองรถ',text:'เลือกวันรับ-คืน แล้วเลือกรถที่ว่าง',icon:Car,tone:'from-blue-700 to-blue-600 text-blue-50'}]:[]),...(rooms?[{href:'/rooms',title:'จองห้องประชุม',text:'ดูห้องว่างแล้วแตะเพื่อจอง',icon:CalendarDays,tone:'from-indigo-600 to-violet-600 text-indigo-50'}]:[])];
- const today=now();
+ const showCar=cars&&!!(pass||nextCar),places=showCar?await loadCarPlaces(s):{},place=places[(pass??nextCar)?.car.stationId??''];
  return <div className="space-y-7 lg:space-y-8">
   <h1 className="sr-only">หน้าแรก</h1>
 
-  <section aria-labelledby="start-title">
-   <div className="mb-3 flex items-baseline justify-between gap-3"><h2 id="start-title" className="text-lg sm:text-xl">เริ่มจอง</h2><p className="truncate text-sm text-muted-foreground"><span className="sm:hidden">{formatDate(today)}</span><span className="hidden sm:inline">{formatDateLong(today)}</span></p></div>
-   <nav aria-label="จองใหม่" className={'grid gap-3 sm:gap-4 '+(actions.length>1?'grid-cols-2':'grid-cols-1')}>
-    {actions.map(a=><Link key={a.href} href={a.href} className={'group relative isolate flex min-h-36 flex-col justify-between gap-4 overflow-hidden rounded-3xl bg-linear-to-br p-4 shadow-raised transition active:scale-[.98] sm:min-h-40 sm:p-6 '+a.tone}>
-     <a.icon aria-hidden className="absolute -right-5 -bottom-6 -z-10 size-32 text-white/10 transition-transform group-hover:scale-110 sm:size-40"/>
-     <span className="flex items-start justify-between gap-2"><span className="grid size-12 place-items-center rounded-2xl bg-white/20 text-white ring-1 ring-white/25"><a.icon aria-hidden className="size-6"/></span><ArrowUpRight aria-hidden className="size-6 text-white/80 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/></span>
-     <span className="min-w-0"><span className="block font-heading text-xl font-semibold leading-tight text-white sm:text-2xl">{a.title}</span><span className="mt-1 hidden text-sm leading-snug min-[360px]:block sm:text-base">{a.text}</span></span>
-    </Link>)}
-   </nav>
-  </section>
+  {/* ปุ่มเริ่มจองอยู่บนสุดของหน้า ไม่มีหัวข้อและวันที่ */}
+  <nav aria-label="จองใหม่" className={'grid gap-3 sm:gap-4 '+(actions.length>1?'grid-cols-2':'grid-cols-1')}>
+   {actions.map(a=><Link key={a.href} href={a.href} className={'group relative isolate flex min-h-36 flex-col justify-between gap-4 overflow-hidden rounded-3xl bg-linear-to-br p-4 shadow-raised transition active:scale-[.98] sm:min-h-40 sm:p-6 '+a.tone}>
+    <a.icon aria-hidden className="absolute -right-5 -bottom-6 -z-10 size-32 text-white/10 transition-transform group-hover:scale-110 sm:size-40"/>
+    <span className="flex items-start justify-between gap-2"><span className="grid size-12 place-items-center rounded-2xl bg-white/20 text-white ring-1 ring-white/25"><a.icon aria-hidden className="size-6"/></span><ArrowUpRight aria-hidden className="size-6 text-white/80 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/></span>
+    <span className="min-w-0"><span className="block font-heading text-xl font-semibold leading-tight text-white sm:text-2xl">{a.title}</span><span className="mt-1 hidden text-sm leading-snug min-[360px]:block sm:text-base">{a.text}</span></span>
+   </Link>)}
+  </nav>
 
   {count>0&&<Link href="/rooms/approvals" className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-accent p-3 font-medium text-accent-foreground transition-colors hover:bg-accent/70 sm:p-4">
    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-primary shadow-sm"><BellRing size={20} aria-hidden/></span>
    <span className="min-w-0 flex-1">มีคำขอจองห้องรออนุมัติ {count} รายการ</span><span className="shrink-0 text-primary underline underline-offset-4">ดูคำขอ</span>
   </Link>}
 
-  <div className="grid grid-cols-1 gap-7 lg:grid-cols-2 lg:items-start lg:gap-6">
-   {cars&&<section aria-labelledby="car-status-title" className="min-w-0">
+  <div className={'grid grid-cols-1 gap-7 lg:items-start lg:gap-6 '+(showCar?'lg:grid-cols-2':'')}>
+   {showCar&&<section aria-labelledby="car-status-title" className="min-w-0">
     <SectionTitle id="car-status-title" icon={CarFront} title="สถานะการจองรถ" href="/my?tab=cars" link="ทั้งหมด"/>
-    {pass?<CarPass booking={pass} compact/>
-    :nextCar?<div className="space-y-2"><MyCarBookingCard booking={nextCar}/><p className="px-1 text-sm text-muted-foreground">บัตรรับรถพร้อม QR จะขึ้นที่หน้านี้ก่อนเวลารับรถ {appConfig.car.pickupEarlyMinutes} นาที</p></div>
-    :<EmptyState icon={Car} title="ยังไม่มีการจองรถ" description="จองรถแล้วสถานะและ QR รับรถจะแสดงที่นี่"><Button asChild><Link href="/cars">จองรถ</Link></Button></EmptyState>}
+    {pass?<CarPass booking={pass} compact place={place}/>
+    :nextCar&&<div className="space-y-2"><MyCarBookingCard booking={nextCar} place={place}/><p className="px-1 text-sm text-muted-foreground">บัตรรับรถพร้อม QR จะขึ้นที่หน้านี้ก่อนเวลารับรถ {appConfig.car.pickupEarlyMinutes} นาที</p></div>}
    </section>}
    <section aria-labelledby="upcoming-title" className="min-w-0">
     <SectionTitle id="upcoming-title" icon={CalendarClock} title="การจองที่กำลังจะถึง" href="/my" link="ทั้งหมด"/>

@@ -9,6 +9,7 @@ import {LinkTabs} from '@/shared/ui/link-tabs';
 import {Button} from '@/components/ui/button';
 import {CarPass} from '@/features/cars/components/car-pass';
 import {MyCarBookingCard} from '@/features/cars/components/my-car-bookings';
+import {loadCarPlaces} from '@/features/cars/lib/load-places';
 import {MyRoomBookingCard} from '@/features/rooms/components/my-room-bookings';
 function Section({title,count,children}:{title:string;count:number;children:React.ReactNode}) {return <section className="mb-10"><h2 className="mb-4 flex items-center gap-2 text-xl">{title}<span className="rounded-full bg-muted px-2.5 text-base font-medium tabular-nums text-muted-foreground">{count}</span></h2>{children}</section>;}
 export default async function MyPage({searchParams}:{searchParams:Promise<{tab?:string}>}) {
@@ -18,11 +19,11 @@ export default async function MyPage({searchParams}:{searchParams:Promise<{tab?:
  const tabs=[...(cars?[{key:'cars',label:'รถ',href:'/my?tab=cars'}]:[]),...(rooms?[{key:'rooms',label:'ห้องประชุม',href:'/my?tab=rooms'}]:[])];
  const header=<><PageHeader icon={ClipboardList} title="การจองของฉัน" description="รายการจองรถและห้องประชุมของคุณ"/>{tabs.length>1&&<LinkTabs label="ประเภทการจอง" active={tab} items={tabs}/>}</>;
  if(tab==='cars'){
-  const [active,upcoming,history]=await Promise.all([s.carBookings.listMine('active'),s.carBookings.listMine('upcoming'),s.carBookings.listMine('history')]);
+  const [active,upcoming,history,places]=await Promise.all([s.carBookings.listMine('active'),s.carBookings.listMine('upcoming'),s.carBookings.listMine('history'),loadCarPlaces(s)]);
   return <>{header}
-   <Section title="กำลังใช้งาน" count={active.length}>{active.length?active.map(b=><CarPass key={b.id} booking={b}/>):<EmptyState icon={Car} title="ไม่มีรถที่กำลังใช้งาน"/>}</Section>
-   <Section title="กำลังจะถึง" count={upcoming.length}>{upcoming.length?<div className="space-y-3">{upcoming.map(b=><MyCarBookingCard key={b.id} booking={b}/>)}</div>:<EmptyState icon={Car} title="ยังไม่มีรายการจอง"><Button asChild><Link href="/cars">จองรถ</Link></Button></EmptyState>}</Section>
-   <Section title="ประวัติ 30 วัน" count={history.length}>{history.length?<div className="space-y-3">{[...history].reverse().map(b=><MyCarBookingCard key={b.id} booking={b}/>)}</div>:<EmptyState title="ยังไม่มีประวัติการจอง"/>}</Section>
+   <Section title="กำลังใช้งาน" count={active.length}>{active.length?active.map(b=><CarPass key={b.id} booking={b} place={places[b.car.stationId]}/>):<EmptyState icon={Car} title="ไม่มีรถที่กำลังใช้งาน"/>}</Section>
+   <Section title="กำลังจะถึง" count={upcoming.length}>{upcoming.length?<div className="space-y-3">{upcoming.map(b=><MyCarBookingCard key={b.id} booking={b} place={places[b.car.stationId]}/>)}</div>:<EmptyState icon={Car} title="ยังไม่มีรายการจอง"><Button asChild><Link href="/cars">จองรถ</Link></Button></EmptyState>}</Section>
+   <Section title="ประวัติ 30 วัน" count={history.length}>{history.length?<div className="space-y-3">{[...history].reverse().map(b=><MyCarBookingCard key={b.id} booking={b} place={places[b.car.stationId]}/>)}</div>:<EmptyState title="ยังไม่มีประวัติการจอง"/>}</Section>
   </>;
  }
  const [upcoming,history]=await Promise.all([s.roomBookings.listMine('upcoming'),s.roomBookings.listMine('history')]);

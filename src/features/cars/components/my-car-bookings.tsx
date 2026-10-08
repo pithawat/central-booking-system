@@ -3,7 +3,7 @@ import {useTransition} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {toast} from 'sonner';
-import {QrCode,MapPin,ChevronRight,CalendarClock} from 'lucide-react';
+import {QrCode,MapPin,ChevronRight,CalendarClock,MapPinned} from 'lucide-react';
 import type {CarBookingDetail} from '@/shared/data/types';
 import {PeriodText} from '@/shared/ui/period-text';
 import {StatusBadge} from '@/shared/ui/status-badge';
@@ -11,8 +11,9 @@ import {InlineConfirm} from '@/shared/ui/inline-confirm';
 import {Button} from '@/components/ui/button';
 import {changeCar} from '../actions';
 import {CarPhoto,LicensePlate} from './car-visual';
+import {placeLabel,type CarPlace} from '../lib/places';
 /** การ์ดการจองรถแบบย่อในหน้า "การจองของฉัน" (§10.4) */
-export function MyCarBookingCard({booking:b}:{booking:CarBookingDetail}) {
+export function MyCarBookingCard({booking:b,place}:{booking:CarBookingDetail;place?:CarPlace}) {
  const router=useRouter(),[pending,start]=useTransition();
  const cancel=()=>start(async()=>{const r=await changeCar('cancel',b.id);if(!r.ok){toast.error(r.error.message);return;}toast.success('ยกเลิกการจองแล้ว');router.refresh();});
  return <article className="surface overflow-hidden">
@@ -28,6 +29,7 @@ export function MyCarBookingCard({booking:b}:{booking:CarBookingDetail}) {
    {/* วันเวลาและปลายทางเต็มความกว้างการ์ด จอแคบจะได้ไม่ถูกบีบข้างรูปรถ */}
    <div className="mt-3 space-y-1">
     <p className="flex items-start gap-2 font-heading font-medium tabular-nums"><CalendarClock size={18} aria-hidden className="mt-0.5 shrink-0 text-muted-foreground"/><span className="min-w-0"><PeriodText start={b.start} end={b.end}/></span></p>
+    <p className="flex items-start gap-2 text-sm text-muted-foreground"><MapPinned size={16} aria-hidden className="mt-0.5 shrink-0 text-primary"/><span className="min-w-0">รับ-คืนรถที่ <span className="font-medium text-foreground">{placeLabel(place)}</span></span></p>
     <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin size={16} aria-hidden className="shrink-0"/><span className="truncate">{b.purpose} · {b.destination}</span></p>
    </div>
   </Link>

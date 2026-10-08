@@ -1,5 +1,5 @@
 'use client';
-import {useTransition} from 'react';
+import {useOptimistic,useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 import {ChevronLeft,ChevronRight,Plus} from 'lucide-react';
 import type {Building,Room,RoomBookingDetail,Site,User} from '@/shared/data/types';
@@ -24,12 +24,14 @@ type Props={room:Room;building?:Building;site?:Site;date:string;view:'week'|'day
 export function RoomWeekView({room,building,site,date,view,bookings,today,maxDate,me,supervisor}:Props) {
  const router=useRouter(),mobile=useMobile(),now=useNow(),[pending,start]=useTransition(),panels=useBookingPanels(bookings);
  const mode=view??(mobile?'day':'week');
- const go=(patch:{date?:string;view?:string})=>start(()=>router.replace('/rooms/'+room.id+'?'+new URLSearchParams({date,view:mode,...patch}),{scroll:false}));
+ // ปุ่มเลื่อนวัน/สัปดาห์ใช้วันที่ใหม่ทันทีระหว่างโหลด กดติดกันจึงนับต่อเนื่อง ส่วนตาราง/การ์ดยังใช้ข้อมูลจริง
+ const [navDate,setNavDate]=useOptimistic(date),navMonday=weekStart(navDate);
+ const go=(patch:{date?:string;view?:string})=>start(()=>{if(patch.date)setNavDate(patch.date);router.replace('/rooms/'+room.id+'?'+new URLSearchParams({date:navDate,view:mode,...patch}),{scroll:false});});
  const monday=weekStart(date),days=Array.from({length:7},(_,i)=>addDays(monday,i)),thisWeek=weekStart(today);
  const hours=timeOptions(appConfig.room.dayStart,appConfig.room.dayEnd,appConfig.room.slotMinutes).slice(0,-1);
  const selected=days.includes(date)?date:monday,navBtn='px-4';
  // เช่น "5 – 11 ต.ค." หรือ "28 ก.ย. – 4 ต.ค." ถ้าข้ามเดือน
- const dm=(d:string)=>formatDateShort(bangkokDateTime(d,'12:00')).replace(/^\S+\s/,''),first=dm(days[0]),last=dm(days[6]);
+ const dm=(d:string)=>formatDateShort(bangkokDateTime(d,'12:00')).replace(/^\S+\s/,''),first=dm(navMonday),last=dm(addDays(navMonday,6));
  const weekRange=(first.split(' ')[1]===last.split(' ')[1]?first.split(' ')[0]:first)+' – '+last;
  return <div className="space-y-5">
   <div className="space-y-3">
@@ -41,18 +43,18 @@ export function RoomWeekView({room,building,site,date,view,bookings,today,maxDat
     {mode==='week'?<>
      {/* มือถือ: ปุ่มเลื่อนสัปดาห์แบบ ‹ ช่วงวันที่ › */}
      <div className="flex w-full items-center gap-1 rounded-2xl border bg-white p-1 shadow-card sm:hidden">
-      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ก่อน" onClick={()=>go({date:addDays(monday,-7)})}><ChevronLeft aria-hidden/></Button>
-      <div className="flex min-w-0 flex-1 flex-col items-center leading-tight"><span className="truncate font-heading text-lg font-semibold tabular-nums">{weekRange}</span>{monday!==thisWeek?<button type="button" onClick={()=>go({date:today})} className="min-h-6 text-sm font-medium text-primary underline underline-offset-2">กลับสัปดาห์นี้</button>:<span className="text-sm text-muted-foreground">สัปดาห์นี้</span>}</div>
-      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ถัดไป" disabled={addDays(monday,7)>maxDate} onClick={()=>go({date:addDays(monday,7)})}><ChevronRight aria-hidden/></Button>
+      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ก่อน" onClick={()=>go({date:addDays(navMonday,-7)})}><ChevronLeft aria-hidden/></Button>
+      <div className="flex min-w-0 flex-1 flex-col items-center leading-tight"><span className="truncate font-heading text-lg font-semibold tabular-nums">{weekRange}</span>{navMonday!==thisWeek?<button type="button" onClick={()=>go({date:today})} className="min-h-6 text-sm font-medium text-primary underline underline-offset-2">กลับสัปดาห์นี้</button>:<span className="text-sm text-muted-foreground">สัปดาห์นี้</span>}</div>
+      <Button variant="ghost" size="icon" className="shrink-0" aria-label="สัปดาห์ถัดไป" disabled={addDays(navMonday,7)>maxDate} onClick={()=>go({date:addDays(navMonday,7)})}><ChevronRight aria-hidden/></Button>
      </div>
      <div className="hidden flex-wrap gap-2 sm:flex">
-      <Button variant="outline" className={navBtn} onClick={()=>go({date:addDays(monday,-7)})}><ChevronLeft aria-hidden/>สัปดาห์ก่อน</Button>
-      <Button variant={monday===thisWeek?'secondary':'outline'} className={navBtn} onClick={()=>go({date:today})}>สัปดาห์นี้</Button>
-      <Button variant="outline" className={navBtn} disabled={addDays(monday,7)>maxDate} onClick={()=>go({date:addDays(monday,7)})}>สัปดาห์ถัดไป<ChevronRight aria-hidden/></Button>
+      <Button variant="outline" className={navBtn} onClick={()=>go({date:addDays(navMonday,-7)})}><ChevronLeft aria-hidden/>สัปดาห์ก่อน</Button>
+      <Button variant={navMonday===thisWeek?'secondary':'outline'} className={navBtn} onClick={()=>go({date:today})}>สัปดาห์นี้</Button>
+      <Button variant="outline" className={navBtn} disabled={addDays(navMonday,7)>maxDate} onClick={()=>go({date:addDays(navMonday,7)})}>สัปดาห์ถัดไป<ChevronRight aria-hidden/></Button>
      </div>
-    </>:<div className="w-full sm:w-auto"><DateNav compact={mobile} date={date} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
+    </>:<div className="w-full sm:w-auto"><DateNav compact={mobile} date={navDate} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
    </div>
-   {mode==='day'&&<div className="md:hidden"><DayStrip date={date} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
+   {mode==='day'&&<div className="md:hidden"><DayStrip date={navDate} today={today} maxDate={maxDate} onChange={d=>go({date:d})}/></div>}
   </div>
   <div className={pending?'opacity-60 transition-opacity':'transition-opacity'}>
   {mode==='week'&&<div className="space-y-3 md:hidden">
@@ -66,7 +68,7 @@ export function RoomWeekView({room,building,site,date,view,bookings,today,maxDat
   </div>}
   {mode==='week'?<div className="hidden md:block">
    <p className="mb-3 font-heading text-lg font-semibold">{formatDate(bangkokDateTime(days[0],'12:00'))} – {formatDate(bangkokDateTime(days[6],'12:00'))}</p>
-   <div className="surface overflow-x-auto scrollbar-thin">
+   <div className="surface overflow-x-auto pb-3 scrollbar-thin lg:pb-0">
     <div className="grid min-w-[760px] grid-cols-[56px_repeat(7,minmax(0,1fr))]">
      <div className="sticky left-0 z-10 border-b border-r bg-white"/>
      {days.map((d,i)=><div key={d} className={'border-b border-r px-2 py-2 text-center last:border-r-0 '+(d===today?'bg-accent text-accent-foreground':'')}><p className="text-sm text-muted-foreground">{weekdays[i]}</p><p className="font-heading font-semibold tabular-nums">{formatDate(bangkokDateTime(d,'12:00')).split(' ').slice(1,3).join(' ')}</p></div>)}
